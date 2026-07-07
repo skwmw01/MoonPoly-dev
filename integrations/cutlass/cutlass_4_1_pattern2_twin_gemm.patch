@@ -1,0 +1,525 @@
+diff --git a/3rdparty/cutlass/include/cutlass/gemm/device/gemm.h b/3rdparty/cutlass/include/cutlass/gemm/device/gemm.h
+index f4ea4ebe..c348fec7 100644
+--- a/3rdparty/cutlass/include/cutlass/gemm/device/gemm.h
++++ b/3rdparty/cutlass/include/cutlass/gemm/device/gemm.h
+@@ -469,6 +469,33 @@ public:
+     return Status::kSuccess;
+   }
+ 
++  /// Exposes initialized kernel parameters for fused launch wrappers.
++  typename GemmKernel::Params get_param() const {
++    return params_;
++  }
++
++  /// Returns the CUDA grid shape implied by the initialized parameters.
++  dim3 get_grid_shape() const {
++    ThreadblockSwizzle threadblock_swizzle;
++    return threadblock_swizzle.get_grid_shape(params_.grid_tiled_shape);
++  }
++
++  /// Returns the flattened CTA count implied by the initialized parameters.
++  int get_grid_size() const {
++    dim3 grid = get_grid_shape();
++    return int(grid.x * grid.y * grid.z);
++  }
++
++  /// Returns the thread count required by the underlying GEMM kernel.
++  int get_block_size() const {
++    return GemmKernel::kThreadCount;
++  }
++
++  /// Returns the dynamic shared-memory size required by the underlying kernel.
++  int get_smem_size() const {
++    return int(sizeof(typename GemmKernel::SharedStorage));
++  }
++
+   /// Runs the kernel using initialized state.
+   Status run(cudaStream_t stream = nullptr) {
+ 
+@@ -736,6 +763,31 @@ public:
+     return underlying_operator_.update(to_underlying_arguments(args), workspace);
+   }
+ 
++  /// Exposes initialized kernel parameters for fused launch wrappers.
++  typename GemmKernel::Params get_param() const {
++    return underlying_operator_.get_param();
++  }
++
++  /// Returns the CUDA grid shape implied by the initialized parameters.
++  dim3 get_grid_shape() const {
++    return underlying_operator_.get_grid_shape();
++  }
++
++  /// Returns the flattened CTA count implied by the initialized parameters.
++  int get_grid_size() const {
++    return underlying_operator_.get_grid_size();
++  }
++
++  /// Returns the thread count required by the underlying GEMM kernel.
++  int get_block_size() const {
++    return underlying_operator_.get_block_size();
++  }
++
++  /// Returns the dynamic shared-memory size required by the underlying kernel.
++  int get_smem_size() const {
++    return underlying_operator_.get_smem_size();
++  }
++
+   /// Runs the kernel using initialized state.
+   Status run(cudaStream_t stream = nullptr) {
+ 
+@@ -770,3 +822,5 @@ public:
+ } // namespace cutlass
+ 
+ ////////////////////////////////////////////////////////////////////////////////
++
++#include "cutlass/gemm/device/twin_gemm.h"
+diff --git a/3rdparty/cutlass/include/cutlass/gemm/kernel/gemm.h b/3rdparty/cutlass/include/cutlass/gemm/kernel/gemm.h
+index 22b5f48d..97698d89 100644
+--- a/3rdparty/cutlass/include/cutlass/gemm/kernel/gemm.h
++++ b/3rdparty/cutlass/include/cutlass/gemm/kernel/gemm.h
+@@ -200,17 +200,25 @@ struct Gemm {
+ 
+   /// Executes one GEMM
+   CUTLASS_DEVICE
+-  void operator()(Params const &params, SharedStorage &shared_storage) {
++  void operator()(
++    Params const &params,
++    SharedStorage &shared_storage,
++    int start_grid_offset = 0,
++    bool linear_grid = false) {
+ 
+     // Compute threadblock location
+     ThreadblockSwizzle threadblock_swizzle;
+ 
+     cutlass::gemm::GemmCoord threadblock_tile_offset =
+-        threadblock_swizzle.get_tile_offset(params.swizzle_log_tile);
++        linear_grid
++          ? threadblock_swizzle.get_tile_offset(
++              params.swizzle_log_tile, start_grid_offset, params.grid_tiled_shape)
++          : threadblock_swizzle.get_tile_offset(params.swizzle_log_tile);
+ 
+     // Early exit if CTA is out of range
+     if (params.grid_tiled_shape.m() <= threadblock_tile_offset.m() ||
+-      params.grid_tiled_shape.n() <= threadblock_tile_offset.n()) {
++      params.grid_tiled_shape.n() <= threadblock_tile_offset.n() ||
++      kThreadCount <= threadIdx.x) {
+ 
+       return;
+     }
+@@ -286,7 +294,10 @@ struct Gemm {
+     //
+ 
+     threadblock_tile_offset =
+-        threadblock_swizzle.get_tile_offset(params.swizzle_log_tile);
++        linear_grid
++          ? threadblock_swizzle.get_tile_offset(
++              params.swizzle_log_tile, start_grid_offset, params.grid_tiled_shape)
++          : threadblock_swizzle.get_tile_offset(params.swizzle_log_tile);
+ 
+     //assume identity swizzle
+     MatrixCoord threadblock_offset(
+@@ -377,4 +388,3 @@ struct Gemm {
+ } // namespace kernel
+ } // namespace gemm
+ } // namespace cutlass
+-
+diff --git a/3rdparty/cutlass/include/cutlass/gemm/threadblock/threadblock_swizzle.h b/3rdparty/cutlass/include/cutlass/gemm/threadblock/threadblock_swizzle.h
+index 9495d785..86a2f03c 100644
+--- a/3rdparty/cutlass/include/cutlass/gemm/threadblock/threadblock_swizzle.h
++++ b/3rdparty/cutlass/include/cutlass/gemm/threadblock/threadblock_swizzle.h
+@@ -139,6 +139,23 @@ struct GemmIdentityThreadblockSwizzle {
+                      block_idx_z};
+   }
+ 
++  /// Obtains the threadblock offset from a flattened grid.
++  CUTLASS_DEVICE
++  static GemmCoord get_tile_offset(int log_tile, int start_grid_offset, GemmCoord tiled_shape) {
++    int tile = 1 << log_tile;
++    int grid_x = tiled_shape.m() * tile;
++    int grid_y = (tiled_shape.n() + tile - 1) / tile;
++    int linear_idx = RematerializeBlockIdxX() - start_grid_offset;
++    int block_idx_z = linear_idx / (grid_x * grid_y);
++    int rem = linear_idx - block_idx_z * grid_x * grid_y;
++    int block_idx_y = rem / grid_x;
++    int block_idx_x = rem - block_idx_y * grid_x;
++
++    return GemmCoord{(block_idx_x >> log_tile),
++                     (block_idx_y << log_tile) + (block_idx_x & ((1 << log_tile) - 1)),
++                     block_idx_z};
++  }
++
+   /// Obtains the threadblock offset (in units of threadblock-scoped tiles)
+   CUTLASS_DEVICE
+   static GemmCoord get_tile_offset(GemmCoord tiled_shape) {
+@@ -200,6 +217,20 @@ struct GemmHorizontalThreadblockSwizzle {
+       RematerializeBlockIdxZ()
+     };
+   }
++
++  /// Obtains the threadblock offset from a flattened grid.
++  CUTLASS_DEVICE
++  static GemmCoord get_tile_offset(int log_tile, int start_grid_offset, GemmCoord tiled_shape) {
++    int grid_x = tiled_shape.n();
++    int grid_y = tiled_shape.m();
++    int linear_idx = RematerializeBlockIdxX() - start_grid_offset;
++    int block_idx_z = linear_idx / (grid_x * grid_y);
++    int rem = linear_idx - block_idx_z * grid_x * grid_y;
++    int block_idx_y = rem / grid_x;
++    int block_idx_x = rem - block_idx_y * grid_x;
++
++    return GemmCoord{block_idx_y, block_idx_x, block_idx_z};
++  }
+ };
+ 
+ /////////////////////////////////////////////////////////////////////////////////////////////////
+@@ -254,6 +285,23 @@ struct GemmBatchedIdentityThreadblockSwizzle {
+                      block_idx_z};
+   }
+ 
++  /// Obtains the threadblock offset from a flattened grid.
++  CUTLASS_DEVICE
++  static GemmCoord get_tile_offset(int log_tile, int start_grid_offset, GemmCoord tiled_shape) {
++    int tile = 1 << log_tile;
++    int grid_x = tiled_shape.m() * tile;
++    int grid_y = (tiled_shape.n() + tile - 1) / tile;
++    int linear_idx = RematerializeBlockIdxX() - start_grid_offset;
++    int block_idx_z = linear_idx / (grid_x * grid_y);
++    int rem = linear_idx - block_idx_z * grid_x * grid_y;
++    int block_idx_y = rem / grid_x;
++    int block_idx_x = rem - block_idx_y * grid_x;
++
++    return GemmCoord{(block_idx_x >> log_tile),
++                     (block_idx_y << log_tile) + (block_idx_x & ((1 << log_tile) - 1)),
++                     block_idx_z};
++  }
++
+   /// Gets the batch index
+   CUTLASS_DEVICE
+   static int get_batch_idx() {
+@@ -316,6 +364,23 @@ struct GemmSplitKIdentityThreadblockSwizzle {
+                      block_idx_z};
+   }
+ 
++  /// Obtains the threadblock offset from a flattened grid.
++  CUTLASS_DEVICE
++  static GemmCoord get_tile_offset(int log_tile, int start_grid_offset, GemmCoord tiled_shape) {
++    int tile = 1 << log_tile;
++    int grid_x = tiled_shape.m() * tile;
++    int grid_y = (tiled_shape.n() + tile - 1) / tile;
++    int linear_idx = RematerializeBlockIdxX() - start_grid_offset;
++    int block_idx_z = linear_idx / (grid_x * grid_y);
++    int rem = linear_idx - block_idx_z * grid_x * grid_y;
++    int block_idx_y = rem / grid_x;
++    int block_idx_x = rem - block_idx_y * grid_x;
++
++    return GemmCoord{(block_idx_x >> log_tile),
++                     (block_idx_y << log_tile) + (block_idx_x & ((1 << log_tile) - 1)),
++                     block_idx_z};
++  }
++
+   /// Obtains the threadblock offset (in units of threadblock-scoped tiles)
+   CUTLASS_DEVICE
+   static GemmCoord get_tile_offset(GemmCoord tiled_shape) {
+@@ -375,6 +440,20 @@ struct GemmSplitKHorizontalThreadblockSwizzle {
+     };
+   }
+ 
++  /// Obtains the threadblock offset from a flattened grid.
++  CUTLASS_DEVICE
++  static GemmCoord get_tile_offset(int log_tile, int start_grid_offset, GemmCoord tiled_shape) {
++    int grid_x = tiled_shape.n();
++    int grid_y = tiled_shape.m();
++    int linear_idx = RematerializeBlockIdxX() - start_grid_offset;
++    int block_idx_z = linear_idx / (grid_x * grid_y);
++    int rem = linear_idx - block_idx_z * grid_x * grid_y;
++    int block_idx_y = rem / grid_x;
++    int block_idx_x = rem - block_idx_y * grid_x;
++
++    return GemmCoord{block_idx_y, block_idx_x, block_idx_z};
++  }
++
+   /// Obtains the threadblock offset (in units of threadblock-scoped tiles)
+   CUTLASS_DEVICE
+   static GemmCoord get_tile_offset(GemmCoord tiled_shape) {
+@@ -456,4 +535,3 @@ struct GemvBatchedStridedThreadblockDefaultSwizzle {
+ } // namespace threadblock
+ } // namespace gemm
+ } // namespace cutlass
+-
+diff --git a/3rdparty/cutlass/include/cutlass/gemm/device/twin_gemm.h b/3rdparty/cutlass/include/cutlass/gemm/device/twin_gemm.h
+new file mode 100644
+index 00000000..de7453c4
+--- /dev/null
++++ b/3rdparty/cutlass/include/cutlass/gemm/device/twin_gemm.h
+@@ -0,0 +1,270 @@
++/***************************************************************************************************
++ * Copyright (c) 2017 - 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
++ * SPDX-License-Identifier: BSD-3-Clause
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright notice, this
++ * list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above copyright notice,
++ * this list of conditions and the following disclaimer in the documentation
++ * and/or other materials provided with the distribution.
++ *
++ * 3. Neither the name of the copyright holder nor the names of its
++ * contributors may be used to endorse or promote products derived from
++ * this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
++ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
++ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
++ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
++ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
++ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ **************************************************************************************************/
++/*! \file
++    \brief Lightweight fused launcher for two initialized CUTLASS 2.x GEMM device operators.
++*/
++
++#pragma once
++
++#include <algorithm>
++
++#include "cuda_runtime_api.h"
++
++#include "cutlass/arch/synclog.hpp"
++#include "cutlass/cutlass.h"
++#include "cutlass/device_kernel.h"
++
++////////////////////////////////////////////////////////////////////////////////
++
++namespace cutlass {
++namespace gemm {
++namespace device {
++namespace detail {
++
++////////////////////////////////////////////////////////////////////////////////
++
++template <typename GemmKernel0, typename GemmKernel1>
++CUTLASS_GLOBAL
++void TwinKernel(
++    typename GemmKernel0::Params params0,
++    typename GemmKernel1::Params params1,
++    int gemm0_grid_size) {
++  extern __shared__ int SharedStorageBase[];
++
++  if (int(blockIdx.x) < gemm0_grid_size) {
++    typename GemmKernel0::SharedStorage *shared_storage =
++        reinterpret_cast<typename GemmKernel0::SharedStorage *>(SharedStorageBase);
++    GemmKernel0 op;
++    op(params0, *shared_storage, 0, true);
++  } else {
++    typename GemmKernel1::SharedStorage *shared_storage =
++        reinterpret_cast<typename GemmKernel1::SharedStorage *>(SharedStorageBase);
++    GemmKernel1 op;
++    op(params1, *shared_storage, gemm0_grid_size, true);
++  }
++
++  cutlass::arch::synclog_print();
++}
++
++////////////////////////////////////////////////////////////////////////////////
++
++} // namespace detail
++
++////////////////////////////////////////////////////////////////////////////////
++
++template <typename GEMMOperator0, typename GEMMOperator1>
++class TwinGemm {
++ public:
++  using GemmKernel0 = typename GEMMOperator0::GemmKernel;
++  using GemmKernel1 = typename GEMMOperator1::GemmKernel;
++  using Arguments0 = typename GEMMOperator0::Arguments;
++  using Arguments1 = typename GEMMOperator1::Arguments;
++
++ private:
++  class DeviceWorkspace {
++   public:
++    DeviceWorkspace() = default;
++
++    DeviceWorkspace(DeviceWorkspace const &) = delete;
++    DeviceWorkspace &operator=(DeviceWorkspace const &) = delete;
++
++    ~DeviceWorkspace() {
++      if (ptr_) {
++        cudaFree(ptr_);
++      }
++    }
++
++    Status reset(size_t bytes) {
++      if (bytes == bytes_ && (bytes == 0 || ptr_)) {
++        return Status::kSuccess;
++      }
++
++      if (ptr_) {
++        cudaError_t result = cudaFree(ptr_);
++        ptr_ = nullptr;
++        bytes_ = 0;
++
++        if (result != cudaSuccess) {
++          return Status::kErrorInternal;
++        }
++      }
++
++      if (bytes == 0) {
++        return Status::kSuccess;
++      }
++
++      cudaError_t result = cudaMalloc(&ptr_, bytes);
++      if (result != cudaSuccess) {
++        ptr_ = nullptr;
++        bytes_ = 0;
++        return Status::kErrorInternal;
++      }
++
++      bytes_ = bytes;
++      return Status::kSuccess;
++    }
++
++    void *get() const {
++      return ptr_;
++    }
++
++   private:
++    void *ptr_ = nullptr;
++    size_t bytes_ = 0;
++  };
++
++ public:
++  GEMMOperator0 gemm0;
++  GEMMOperator1 gemm1;
++
++  TwinGemm() = default;
++
++  TwinGemm(TwinGemm const &) = delete;
++  TwinGemm &operator=(TwinGemm const &) = delete;
++
++  Status initialize_op0(Arguments0 const &args, cudaStream_t stream = nullptr) {
++    return initialize_impl<GEMMOperator0>(gemm0, workspace0_, args, stream);
++  }
++
++  Status initialize_op1(Arguments1 const &args, cudaStream_t stream = nullptr) {
++    return initialize_impl<GEMMOperator1>(gemm1, workspace1_, args, stream);
++  }
++
++  template <typename ElementA, typename ElementB, typename ElementC, typename Alpha, typename Beta>
++  Status initialize_op0(
++      int m,
++      int n,
++      int k,
++      ElementA *ptr_A,
++      ElementB *ptr_B,
++      ElementC *ptr_C,
++      int split_k_slices,
++      Alpha alpha,
++      Beta beta,
++      cudaStream_t stream = nullptr) {
++    Arguments0 arguments(
++        {m, n, k},
++        {ptr_A, k},
++        {ptr_B, k},
++        {ptr_C, m},
++        {ptr_C, m},
++        {alpha, beta},
++        split_k_slices);
++
++    return initialize_op0(arguments, stream);
++  }
++
++  template <typename ElementA, typename ElementB, typename ElementC, typename Alpha, typename Beta>
++  Status initialize_op1(
++      int m,
++      int n,
++      int k,
++      ElementA *ptr_A,
++      ElementB *ptr_B,
++      ElementC *ptr_C,
++      int split_k_slices,
++      Alpha alpha,
++      Beta beta,
++      cudaStream_t stream = nullptr) {
++    Arguments1 arguments(
++        {m, n, k},
++        {ptr_A, k},
++        {ptr_B, k},
++        {ptr_C, m},
++        {ptr_C, m},
++        {alpha, beta},
++        split_k_slices);
++
++    return initialize_op1(arguments, stream);
++  }
++
++  Status run(cudaStream_t stream = nullptr) {
++    int gemm0_grid_size = gemm0.get_grid_size();
++    int gemm1_grid_size = gemm1.get_grid_size();
++
++    if (gemm0_grid_size <= 0 || gemm1_grid_size <= 0) {
++      return Status::kErrorInvalidProblem;
++    }
++
++    int grid_size = gemm0_grid_size + gemm1_grid_size;
++    int block_size = std::max(gemm0.get_block_size(), gemm1.get_block_size());
++    int smem_size = std::max(gemm0.get_smem_size(), gemm1.get_smem_size());
++
++    if (smem_size >= (48 << 10)) {
++      cudaError_t result = cudaFuncSetAttribute(
++          detail::TwinKernel<GemmKernel0, GemmKernel1>,
++          cudaFuncAttributeMaxDynamicSharedMemorySize,
++          smem_size);
++
++      if (result != cudaSuccess) {
++        return Status::kErrorInternal;
++      }
++    }
++
++    cutlass::arch::synclog_setup();
++
++    dim3 grid(grid_size, 1, 1);
++    dim3 block(block_size, 1, 1);
++    detail::TwinKernel<GemmKernel0, GemmKernel1>
++        <<<grid, block, smem_size, stream>>>(gemm0.get_param(), gemm1.get_param(), gemm0_grid_size);
++
++    cudaError_t result = cudaGetLastError();
++    return result == cudaSuccess ? Status::kSuccess : Status::kErrorInternal;
++  }
++
++ private:
++  template <typename GEMMOperator, typename Arguments>
++  static Status initialize_impl(
++      GEMMOperator &gemm,
++      DeviceWorkspace &workspace,
++      Arguments const &args,
++      cudaStream_t stream) {
++    size_t workspace_size = GEMMOperator::get_workspace_size(args);
++    Status status = workspace.reset(workspace_size);
++    if (status != Status::kSuccess) {
++      return status;
++    }
++
++    return gemm.initialize(args, workspace.get(), stream);
++  }
++
++ private:
++  DeviceWorkspace workspace0_;
++  DeviceWorkspace workspace1_;
++};
++
++////////////////////////////////////////////////////////////////////////////////
++
++} // namespace device
++} // namespace gemm
++} // namespace cutlass
++
++////////////////////////////////////////////////////////////////////////////////

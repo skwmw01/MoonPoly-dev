@@ -1,0 +1,1091 @@
+{
+  "inputs": [
+    "benchmarks/data/llm_gemm/llama2_13b_cublas_shape_summary.json",
+    "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+  ],
+  "name": "llm_family_merged_cublas",
+  "total_score_pct": 200.00000000000014,
+  "num_shapes": 60,
+  "shapes": [
+    {
+      "m": 1,
+      "n": 27648,
+      "k": 5120,
+      "count": 1198080,
+      "total_ms": 232100.58390329778,
+      "score_pct_sum": 40.95671480520473,
+      "num_layers": 40,
+      "models": [
+        "llama2_13b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/llama2_13b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.19372711663937114,
+      "share_pct": 20.478357402602352,
+      "cumulative_share_pct": 20.478357402602352
+    },
+    {
+      "m": 1,
+      "n": 15360,
+      "k": 5120,
+      "count": 1198080,
+      "total_ms": 145890.82895295322,
+      "score_pct_sum": 25.74405015978123,
+      "num_layers": 40,
+      "models": [
+        "llama2_13b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/llama2_13b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.12177052363193878,
+      "share_pct": 12.872025079890607,
+      "cumulative_share_pct": 33.35038248249296
+    },
+    {
+      "m": 1,
+      "n": 5120,
+      "k": 13824,
+      "count": 1198080,
+      "total_ms": 124910.03653265536,
+      "score_pct_sum": 22.041757312886194,
+      "num_layers": 40,
+      "models": [
+        "llama2_13b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/llama2_13b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.10425851072771047,
+      "share_pct": 11.020878656443088,
+      "cumulative_share_pct": 44.37126113893605
+    },
+    {
+      "m": 1,
+      "n": 5120,
+      "k": 5120,
+      "count": 1198080,
+      "total_ms": 63795.81870790571,
+      "score_pct_sum": 11.257477722127842,
+      "num_layers": 40,
+      "models": [
+        "llama2_13b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/llama2_13b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.05324837966405057,
+      "share_pct": 5.628738861063917,
+      "cumulative_share_pct": 49.999999999999964
+    },
+    {
+      "m": 16,
+      "n": 51200,
+      "k": 5120,
+      "count": 33216,
+      "total_ms": 11730.48521283269,
+      "score_pct_sum": 8.574252409488622,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.35315767138826737,
+      "share_pct": 4.287126204744308,
+      "cumulative_share_pct": 54.287126204744276
+    },
+    {
+      "m": 12,
+      "n": 51200,
+      "k": 5120,
+      "count": 32640,
+      "total_ms": 11401.334895759821,
+      "score_pct_sum": 8.333664075072702,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.3493056034240141,
+      "share_pct": 4.166832037536348,
+      "cumulative_share_pct": 58.45395824228062
+    },
+    {
+      "m": 8,
+      "n": 51200,
+      "k": 5120,
+      "count": 32768,
+      "total_ms": 11288.177674859762,
+      "score_pct_sum": 8.250953210487838,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.34448784408141364,
+      "share_pct": 4.125476605243916,
+      "cumulative_share_pct": 62.57943484752454
+    },
+    {
+      "m": 4,
+      "n": 51200,
+      "k": 5120,
+      "count": 32704,
+      "total_ms": 11124.334548920393,
+      "score_pct_sum": 8.131194113410851,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.34015210827178305,
+      "share_pct": 4.065597056705423,
+      "cumulative_share_pct": 66.64503190422997
+    },
+    {
+      "m": 2,
+      "n": 51200,
+      "k": 5120,
+      "count": 32640,
+      "total_ms": 10972.918708860874,
+      "score_pct_sum": 8.020518586532832,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.336180107501865,
+      "share_pct": 4.010259293266413,
+      "cumulative_share_pct": 70.65529119749638
+    },
+    {
+      "m": 1,
+      "n": 51200,
+      "k": 5120,
+      "count": 32768,
+      "total_ms": 10746.66499298811,
+      "score_pct_sum": 7.855141244225153,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.3279621885067172,
+      "share_pct": 3.9275706221125732,
+      "cumulative_share_pct": 74.58286181960895
+    },
+    {
+      "m": 16,
+      "n": 5120,
+      "k": 25600,
+      "count": 33216,
+      "total_ms": 6198.205435216427,
+      "score_pct_sum": 4.530501247234974,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.1866030056363327,
+      "share_pct": 2.265250623617485,
+      "cumulative_share_pct": 76.84811244322644
+    },
+    {
+      "m": 12,
+      "n": 5120,
+      "k": 25600,
+      "count": 32640,
+      "total_ms": 5990.481877788901,
+      "score_pct_sum": 4.378668293996852,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.18353192027539525,
+      "share_pct": 2.189334146998424,
+      "cumulative_share_pct": 79.03744659022486
+    },
+    {
+      "m": 8,
+      "n": 5120,
+      "k": 25600,
+      "count": 32768,
+      "total_ms": 5940.890558004379,
+      "score_pct_sum": 4.342420134995979,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.1813015917359735,
+      "share_pct": 2.171210067497988,
+      "cumulative_share_pct": 81.20865665772286
+    },
+    {
+      "m": 4,
+      "n": 5120,
+      "k": 25600,
+      "count": 32704,
+      "total_ms": 5852.0616074204445,
+      "score_pct_sum": 4.2774917173084095,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.17894023995292455,
+      "share_pct": 2.138745858654203,
+      "cumulative_share_pct": 83.34740251637706
+    },
+    {
+      "m": 2,
+      "n": 5120,
+      "k": 25600,
+      "count": 32640,
+      "total_ms": 5776.240563824773,
+      "score_pct_sum": 4.22207126760451,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.17696815452894524,
+      "share_pct": 2.1110356338022536,
+      "cumulative_share_pct": 85.45843815017932
+    },
+    {
+      "m": 1,
+      "n": 5120,
+      "k": 25600,
+      "count": 32768,
+      "total_ms": 5726.888015389442,
+      "score_pct_sum": 4.185997635554481,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.1747707524227735,
+      "share_pct": 2.092998817777239,
+      "cumulative_share_pct": 87.55143696795656
+    },
+    {
+      "m": 8,
+      "n": 10240,
+      "k": 5120,
+      "count": 32768,
+      "total_ms": 3149.068368881941,
+      "score_pct_sum": 2.3017723955691496,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.09610193996832095,
+      "share_pct": 1.1508861977845741,
+      "cumulative_share_pct": 88.70232316574113
+    },
+    {
+      "m": 4,
+      "n": 10240,
+      "k": 5120,
+      "count": 32704,
+      "total_ms": 3104.757828205824,
+      "score_pct_sum": 2.2693841564413844,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.09493510971764384,
+      "share_pct": 1.1346920782206915,
+      "cumulative_share_pct": 89.83701524396183
+    },
+    {
+      "m": 2,
+      "n": 10240,
+      "k": 5120,
+      "count": 32640,
+      "total_ms": 3032.6497742012143,
+      "score_pct_sum": 2.216677670343419,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.09291206416057642,
+      "share_pct": 1.1083388351717085,
+      "cumulative_share_pct": 90.94535407913354
+    },
+    {
+      "m": 16,
+      "n": 10240,
+      "k": 5120,
+      "count": 33216,
+      "total_ms": 2787.071948930621,
+      "score_pct_sum": 2.0371756103826026,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.08390751291337371,
+      "share_pct": 1.0185878051913007,
+      "cumulative_share_pct": 91.96394188432484
+    },
+    {
+      "m": 12,
+      "n": 10240,
+      "k": 5120,
+      "count": 32640,
+      "total_ms": 2718.522311478853,
+      "score_pct_sum": 1.9870701046489263,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.08328806101344526,
+      "share_pct": 0.9935350523244624,
+      "cumulative_share_pct": 92.9574769366493
+    },
+    {
+      "m": 16,
+      "n": 5120,
+      "k": 8192,
+      "count": 33216,
+      "total_ms": 2649.742264293134,
+      "score_pct_sum": 1.9367961837831686,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.07977306913213916,
+      "share_pct": 0.9683980918915837,
+      "cumulative_share_pct": 93.92587502854089
+    },
+    {
+      "m": 1,
+      "n": 10240,
+      "k": 5120,
+      "count": 32768,
+      "total_ms": 2642.126762032509,
+      "score_pct_sum": 1.931229727031985,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.08063130987648037,
+      "share_pct": 0.9656148635159918,
+      "cumulative_share_pct": 94.89148989205688
+    },
+    {
+      "m": 8,
+      "n": 5120,
+      "k": 8192,
+      "count": 32768,
+      "total_ms": 2591.7295923754573,
+      "score_pct_sum": 1.8943925420798517,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.07909331031419242,
+      "share_pct": 0.9471962710399252,
+      "cumulative_share_pct": 95.83868616309681
+    },
+    {
+      "m": 12,
+      "n": 5120,
+      "k": 8192,
+      "count": 32640,
+      "total_ms": 2587.3100097700953,
+      "score_pct_sum": 1.8911621030898682,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.07926807627972106,
+      "share_pct": 0.9455810515449333,
+      "cumulative_share_pct": 96.78426721464174
+    },
+    {
+      "m": 4,
+      "n": 5120,
+      "k": 8192,
+      "count": 32704,
+      "total_ms": 2551.124946780503,
+      "score_pct_sum": 1.8647130809141617,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.07800651133746644,
+      "share_pct": 0.9323565404570803,
+      "cumulative_share_pct": 97.71662375509882
+    },
+    {
+      "m": 2,
+      "n": 5120,
+      "k": 8192,
+      "count": 32640,
+      "total_ms": 2507.0213635638356,
+      "score_pct_sum": 1.8324761147698367,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.07680825256016653,
+      "share_pct": 0.9162380573849177,
+      "cumulative_share_pct": 98.63286181248374
+    },
+    {
+      "m": 1,
+      "n": 5120,
+      "k": 8192,
+      "count": 32768,
+      "total_ms": 2490.145882129669,
+      "score_pct_sum": 1.8201411913013776,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.07599322150053922,
+      "share_pct": 0.9100705956506883,
+      "cumulative_share_pct": 99.54293240813443
+    },
+    {
+      "m": 9,
+      "n": 51200,
+      "k": 5120,
+      "count": 320,
+      "total_ms": 110.76096072793007,
+      "score_pct_sum": 0.08095934798671438,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.34612800227478147,
+      "share_pct": 0.04047967399335716,
+      "cumulative_share_pct": 99.5834120821278
+    },
+    {
+      "m": 13,
+      "n": 51200,
+      "k": 5120,
+      "count": 256,
+      "total_ms": 89.7587211728096,
+      "score_pct_sum": 0.06560802194666703,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.3506200045812875,
+      "share_pct": 0.032804010973333485,
+      "cumulative_share_pct": 99.61621609310113
+    },
+    {
+      "m": 5,
+      "n": 51200,
+      "k": 5120,
+      "count": 256,
+      "total_ms": 87.47520020604134,
+      "score_pct_sum": 0.06393891066983669,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.34170000080484897,
+      "share_pct": 0.031969455334918316,
+      "cumulative_share_pct": 99.64818554843605
+    },
+    {
+      "m": 15,
+      "n": 51200,
+      "k": 5120,
+      "count": 192,
+      "total_ms": 67.70687991380692,
+      "score_pct_sum": 0.049489502582964966,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.35263999955107767,
+      "share_pct": 0.024744751291482462,
+      "cumulative_share_pct": 99.67293029972753
+    },
+    {
+      "m": 11,
+      "n": 51200,
+      "k": 5120,
+      "count": 192,
+      "total_ms": 66.90611213445663,
+      "score_pct_sum": 0.04890419132456758,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.3484693340336283,
+      "share_pct": 0.024452095662283773,
+      "cumulative_share_pct": 99.69738239538981
+    },
+    {
+      "m": 7,
+      "n": 51200,
+      "k": 5120,
+      "count": 192,
+      "total_ms": 66.21593594551086,
+      "score_pct_sum": 0.048399715615023514,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.34487466638286907,
+      "share_pct": 0.02419985780751174,
+      "cumulative_share_pct": 99.72158225319733
+    },
+    {
+      "m": 6,
+      "n": 51200,
+      "k": 5120,
+      "count": 192,
+      "total_ms": 65.78790441155434,
+      "score_pct_sum": 0.048086851283772415,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.3426453354768455,
+      "share_pct": 0.024043425641886194,
+      "cumulative_share_pct": 99.74562567883922
+    },
+    {
+      "m": 3,
+      "n": 51200,
+      "k": 5120,
+      "count": 192,
+      "total_ms": 64.95539185404778,
+      "score_pct_sum": 0.047478336574225594,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.3383093325731655,
+      "share_pct": 0.02373916828711278,
+      "cumulative_share_pct": 99.76936484712633
+    },
+    {
+      "m": 9,
+      "n": 5120,
+      "k": 25600,
+      "count": 320,
+      "total_ms": 58.250239446759224,
+      "score_pct_sum": 0.04257728873681059,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.18203199827112257,
+      "share_pct": 0.02128864436840528,
+      "cumulative_share_pct": 99.79065349149474
+    },
+    {
+      "m": 13,
+      "n": 5120,
+      "k": 25600,
+      "count": 256,
+      "total_ms": 47.30060788989067,
+      "score_pct_sum": 0.03457379160467266,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.18476799956988543,
+      "share_pct": 0.017286895802336315,
+      "cumulative_share_pct": 99.80794038729708
+    },
+    {
+      "m": 5,
+      "n": 5120,
+      "k": 25600,
+      "count": 256,
+      "total_ms": 46.01651142537594,
+      "score_pct_sum": 0.03363519724944202,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.17975199775537476,
+      "share_pct": 0.016817598624721,
+      "cumulative_share_pct": 99.8247579859218
+    },
+    {
+      "m": 15,
+      "n": 5120,
+      "k": 25600,
+      "count": 192,
+      "total_ms": 35.70278385281563,
+      "score_pct_sum": 0.026096506233226183,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.18595199923341474,
+      "share_pct": 0.013048253116613081,
+      "cumulative_share_pct": 99.83780623903841
+    },
+    {
+      "m": 11,
+      "n": 5120,
+      "k": 25600,
+      "count": 192,
+      "total_ms": 35.177471816539764,
+      "score_pct_sum": 0.02571253592756105,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.18321599904447794,
+      "share_pct": 0.012856267963780517,
+      "cumulative_share_pct": 99.8506625070022
+    },
+    {
+      "m": 7,
+      "n": 5120,
+      "k": 25600,
+      "count": 192,
+      "total_ms": 34.92454360425472,
+      "score_pct_sum": 0.025527661193544063,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.18189866460549334,
+      "share_pct": 0.012763830596772023,
+      "cumulative_share_pct": 99.86342633759897
+    },
+    {
+      "m": 6,
+      "n": 5120,
+      "k": 25600,
+      "count": 192,
+      "total_ms": 34.72588758170605,
+      "score_pct_sum": 0.025382456042257223,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.18086399782138565,
+      "share_pct": 0.012691228021128601,
+      "cumulative_share_pct": 99.87611756562009
+    },
+    {
+      "m": 3,
+      "n": 5120,
+      "k": 25600,
+      "count": 192,
+      "total_ms": 34.21491143107414,
+      "score_pct_sum": 0.025008964374073375,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.17820266370351115,
+      "share_pct": 0.012504482187036679,
+      "cumulative_share_pct": 99.88862204780713
+    },
+    {
+      "m": 9,
+      "n": 10240,
+      "k": 5120,
+      "count": 320,
+      "total_ms": 30.89100879430771,
+      "score_pct_sum": 0.022579399042792592,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.0965344024822116,
+      "share_pct": 0.01128969952139629,
+      "cumulative_share_pct": 99.89991174732853
+    },
+    {
+      "m": 9,
+      "n": 5120,
+      "k": 8192,
+      "count": 320,
+      "total_ms": 25.136127658188343,
+      "score_pct_sum": 0.01837294018346835,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.07855039893183857,
+      "share_pct": 0.009186470091734168,
+      "cumulative_share_pct": 99.90909821742027
+    },
+    {
+      "m": 5,
+      "n": 10240,
+      "k": 5120,
+      "count": 256,
+      "total_ms": 24.55040055513382,
+      "score_pct_sum": 0.017944810235427155,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.09590000216849148,
+      "share_pct": 0.00897240511771357,
+      "cumulative_share_pct": 99.91807062253798
+    },
+    {
+      "m": 13,
+      "n": 10240,
+      "k": 5120,
+      "count": 256,
+      "total_ms": 21.421055555343628,
+      "score_pct_sum": 0.015657454391423423,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.08367599826306105,
+      "share_pct": 0.007828727195711706,
+      "cumulative_share_pct": 99.9258993497337
+    },
+    {
+      "m": 13,
+      "n": 5120,
+      "k": 8192,
+      "count": 256,
+      "total_ms": 20.03046379238367,
+      "score_pct_sum": 0.014641018621048739,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.07824399918899871,
+      "share_pct": 0.007320509310524364,
+      "cumulative_share_pct": 99.93321985904421
+    },
+    {
+      "m": 5,
+      "n": 5120,
+      "k": 8192,
+      "count": 256,
+      "total_ms": 19.891200110316277,
+      "score_pct_sum": 0.014539225563058748,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.07770000043092296,
+      "share_pct": 0.007269612781529369,
+      "cumulative_share_pct": 99.94048947182574
+    },
+    {
+      "m": 7,
+      "n": 10240,
+      "k": 5120,
+      "count": 192,
+      "total_ms": 18.73510441929102,
+      "score_pct_sum": 0.013694191782740039,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.09757866885047406,
+      "share_pct": 0.006847095891370015,
+      "cumulative_share_pct": 99.94733656771712
+    },
+    {
+      "m": 6,
+      "n": 10240,
+      "k": 5120,
+      "count": 192,
+      "total_ms": 18.430976428091526,
+      "score_pct_sum": 0.01347189320650702,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.09599466889631003,
+      "share_pct": 0.006735946603253505,
+      "cumulative_share_pct": 99.95407251432037
+    },
+    {
+      "m": 3,
+      "n": 10240,
+      "k": 5120,
+      "count": 192,
+      "total_ms": 18.18112038820982,
+      "score_pct_sum": 0.013289264038735052,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.09469333535525948,
+      "share_pct": 0.006644632019367521,
+      "cumulative_share_pct": 99.96071714633975
+    },
+    {
+      "m": 15,
+      "n": 10240,
+      "k": 5120,
+      "count": 192,
+      "total_ms": 16.13209570199251,
+      "score_pct_sum": 0.01179155490444615,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.084021331781211,
+      "share_pct": 0.00589577745222307,
+      "cumulative_share_pct": 99.96661292379197
+    },
+    {
+      "m": 11,
+      "n": 10240,
+      "k": 5120,
+      "count": 192,
+      "total_ms": 16.06553567200899,
+      "score_pct_sum": 0.011742903677569574,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.08367466495838016,
+      "share_pct": 0.005871451838784783,
+      "cumulative_share_pct": 99.97248437563076
+    },
+    {
+      "m": 7,
+      "n": 5120,
+      "k": 8192,
+      "count": 192,
+      "total_ms": 15.224831737577915,
+      "score_pct_sum": 0.011128401582841514,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.0792959986332183,
+      "share_pct": 0.005564200791420753,
+      "cumulative_share_pct": 99.97804857642218
+    },
+    {
+      "m": 15,
+      "n": 5120,
+      "k": 8192,
+      "count": 192,
+      "total_ms": 15.128575704991817,
+      "score_pct_sum": 0.011058044431849474,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.07879466513016571,
+      "share_pct": 0.005529022215924734,
+      "cumulative_share_pct": 99.9835775986381
+    },
+    {
+      "m": 11,
+      "n": 5120,
+      "k": 8192,
+      "count": 192,
+      "total_ms": 15.05894386023283,
+      "score_pct_sum": 0.011007147900131525,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.07843199927204599,
+      "share_pct": 0.005503573950065758,
+      "cumulative_share_pct": 99.98908117258817
+    },
+    {
+      "m": 6,
+      "n": 5120,
+      "k": 8192,
+      "count": 192,
+      "total_ms": 15.051775924861431,
+      "score_pct_sum": 0.01100190858683679,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.07839466627531995,
+      "share_pct": 0.005500954293418392,
+      "cumulative_share_pct": 99.9945821268816
+    },
+    {
+      "m": 3,
+      "n": 5120,
+      "k": 8192,
+      "count": 192,
+      "total_ms": 14.824448235332966,
+      "score_pct_sum": 0.010835746236830108,
+      "num_layers": 64,
+      "models": [
+        "qwen3_32b"
+      ],
+      "sources": [
+        "benchmarks/data/llm_gemm/qwen3_32b_cublas_shape_summary.json"
+      ],
+      "avg_ms": 0.0772106678923592,
+      "share_pct": 0.0054178731184150505,
+      "cumulative_share_pct": 100.00000000000001
+    }
+  ]
+}

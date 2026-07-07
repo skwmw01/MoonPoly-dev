@@ -1,0 +1,962 @@
+[
+  {
+    "old_pid": 0,
+    "pid": 400,
+    "threadblock": [
+      16,
+      96,
+      64
+    ],
+    "warp": [
+      16,
+      48,
+      64
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 5,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 1,
+    "pid": 401,
+    "threadblock": [
+      128,
+      128,
+      32
+    ],
+    "warp": [
+      64,
+      64,
+      32
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 5,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 2,
+    "pid": 402,
+    "threadblock": [
+      64,
+      128,
+      64
+    ],
+    "warp": [
+      64,
+      32,
+      64
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 4,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 3,
+    "pid": 403,
+    "threadblock": [
+      64,
+      64,
+      64
+    ],
+    "warp": [
+      32,
+      32,
+      64
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 6,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 4,
+    "pid": 404,
+    "threadblock": [
+      16,
+      32,
+      64
+    ],
+    "warp": [
+      16,
+      32,
+      32
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 6,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 5,
+    "pid": 405,
+    "threadblock": [
+      32,
+      16,
+      32
+    ],
+    "warp": [
+      16,
+      16,
+      32
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 6,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 6,
+    "pid": 406,
+    "threadblock": [
+      16,
+      16,
+      64
+    ],
+    "warp": [
+      16,
+      16,
+      64
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 10,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 7,
+    "pid": 407,
+    "threadblock": [
+      64,
+      8,
+      64
+    ],
+    "warp": [
+      32,
+      8,
+      64
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 4,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 8,
+    "pid": 408,
+    "threadblock": [
+      64,
+      8,
+      64
+    ],
+    "warp": [
+      32,
+      8,
+      64
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 4,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 9,
+    "pid": 409,
+    "threadblock": [
+      64,
+      16,
+      64
+    ],
+    "warp": [
+      16,
+      16,
+      64
+    ],
+    "instruction": [
+      16,
+      8,
+      8
+    ],
+    "stages": 2,
+    "alignment_a": 2,
+    "alignment_b": 2,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 10,
+    "pid": 410,
+    "threadblock": [
+      32,
+      64,
+      64
+    ],
+    "warp": [
+      16,
+      32,
+      32
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 2,
+    "alignment_a": 1,
+    "alignment_b": 1,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 11,
+    "pid": 411,
+    "threadblock": [
+      64,
+      96,
+      64
+    ],
+    "warp": [
+      32,
+      96,
+      32
+    ],
+    "instruction": [
+      16,
+      8,
+      8
+    ],
+    "stages": 2,
+    "alignment_a": 2,
+    "alignment_b": 2,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 12,
+    "pid": 412,
+    "threadblock": [
+      128,
+      64,
+      64
+    ],
+    "warp": [
+      32,
+      32,
+      64
+    ],
+    "instruction": [
+      16,
+      8,
+      8
+    ],
+    "stages": 2,
+    "alignment_a": 2,
+    "alignment_b": 2,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 13,
+    "pid": 413,
+    "threadblock": [
+      16,
+      8,
+      32
+    ],
+    "warp": [
+      16,
+      8,
+      32
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 5,
+    "alignment_a": 2,
+    "alignment_b": 2,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 14,
+    "pid": 414,
+    "threadblock": [
+      96,
+      160,
+      32
+    ],
+    "warp": [
+      48,
+      80,
+      32
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 3,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 15,
+    "pid": 415,
+    "threadblock": [
+      80,
+      128,
+      64
+    ],
+    "warp": [
+      80,
+      32,
+      64
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 3,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 16,
+    "pid": 416,
+    "threadblock": [
+      48,
+      32,
+      64
+    ],
+    "warp": [
+      48,
+      16,
+      64
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 6,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 17,
+    "pid": 417,
+    "threadblock": [
+      256,
+      32,
+      64
+    ],
+    "warp": [
+      64,
+      32,
+      64
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 3,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 18,
+    "pid": 418,
+    "threadblock": [
+      32,
+      128,
+      32
+    ],
+    "warp": [
+      16,
+      64,
+      32
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 5,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 19,
+    "pid": 419,
+    "threadblock": [
+      16,
+      128,
+      64
+    ],
+    "warp": [
+      16,
+      32,
+      64
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 4,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 20,
+    "pid": 420,
+    "threadblock": [
+      80,
+      96,
+      64
+    ],
+    "warp": [
+      80,
+      48,
+      32
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 6,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 21,
+    "pid": 421,
+    "threadblock": [
+      16,
+      64,
+      16
+    ],
+    "warp": [
+      16,
+      64,
+      16
+    ],
+    "instruction": [
+      16,
+      8,
+      8
+    ],
+    "stages": 2,
+    "alignment_a": 4,
+    "alignment_b": 4,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 22,
+    "pid": 422,
+    "threadblock": [
+      128,
+      96,
+      32
+    ],
+    "warp": [
+      32,
+      96,
+      32
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 3,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 23,
+    "pid": 423,
+    "threadblock": [
+      256,
+      128,
+      32
+    ],
+    "warp": [
+      64,
+      64,
+      32
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 3,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 24,
+    "pid": 424,
+    "threadblock": [
+      32,
+      16,
+      64
+    ],
+    "warp": [
+      8,
+      16,
+      64
+    ],
+    "instruction": [
+      16,
+      8,
+      8
+    ],
+    "stages": 2,
+    "alignment_a": 4,
+    "alignment_b": 4,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 25,
+    "pid": 425,
+    "threadblock": [
+      16,
+      8,
+      64
+    ],
+    "warp": [
+      16,
+      8,
+      64
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 5,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 26,
+    "pid": 426,
+    "threadblock": [
+      16,
+      64,
+      64
+    ],
+    "warp": [
+      16,
+      32,
+      32
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 3,
+    "alignment_a": 4,
+    "alignment_b": 4,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 27,
+    "pid": 427,
+    "threadblock": [
+      64,
+      64,
+      16
+    ],
+    "warp": [
+      32,
+      32,
+      16
+    ],
+    "instruction": [
+      16,
+      8,
+      8
+    ],
+    "stages": 2,
+    "alignment_a": 4,
+    "alignment_b": 4,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 28,
+    "pid": 428,
+    "threadblock": [
+      16,
+      32,
+      32
+    ],
+    "warp": [
+      16,
+      16,
+      32
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 4,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 29,
+    "pid": 429,
+    "threadblock": [
+      8,
+      16,
+      64
+    ],
+    "warp": [
+      8,
+      16,
+      32
+    ],
+    "instruction": [
+      16,
+      8,
+      8
+    ],
+    "stages": 2,
+    "alignment_a": 1,
+    "alignment_b": 1,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 30,
+    "pid": 430,
+    "threadblock": [
+      192,
+      192,
+      32
+    ],
+    "warp": [
+      96,
+      48,
+      32
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 5,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 31,
+    "pid": 431,
+    "threadblock": [
+      128,
+      192,
+      64
+    ],
+    "warp": [
+      64,
+      48,
+      64
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 3,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 32,
+    "pid": 432,
+    "threadblock": [
+      32,
+      64,
+      16
+    ],
+    "warp": [
+      32,
+      32,
+      16
+    ],
+    "instruction": [
+      16,
+      8,
+      8
+    ],
+    "stages": 2,
+    "alignment_a": 2,
+    "alignment_b": 2,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 33,
+    "pid": 433,
+    "threadblock": [
+      96,
+      192,
+      64
+    ],
+    "warp": [
+      48,
+      48,
+      64
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 2,
+    "alignment_a": 1,
+    "alignment_b": 1,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 34,
+    "pid": 434,
+    "threadblock": [
+      64,
+      96,
+      32
+    ],
+    "warp": [
+      32,
+      48,
+      32
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 5,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 35,
+    "pid": 435,
+    "threadblock": [
+      8,
+      8,
+      64
+    ],
+    "warp": [
+      8,
+      8,
+      32
+    ],
+    "instruction": [
+      16,
+      8,
+      8
+    ],
+    "stages": 2,
+    "alignment_a": 2,
+    "alignment_b": 2,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 36,
+    "pid": 436,
+    "threadblock": [
+      32,
+      32,
+      32
+    ],
+    "warp": [
+      8,
+      32,
+      32
+    ],
+    "instruction": [
+      16,
+      8,
+      8
+    ],
+    "stages": 2,
+    "alignment_a": 2,
+    "alignment_b": 2,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 37,
+    "pid": 437,
+    "threadblock": [
+      64,
+      32,
+      64
+    ],
+    "warp": [
+      32,
+      32,
+      64
+    ],
+    "instruction": [
+      16,
+      8,
+      16
+    ],
+    "stages": 4,
+    "alignment_a": 8,
+    "alignment_b": 8,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 38,
+    "pid": 438,
+    "threadblock": [
+      16,
+      32,
+      16
+    ],
+    "warp": [
+      16,
+      32,
+      16
+    ],
+    "instruction": [
+      16,
+      8,
+      8
+    ],
+    "stages": 2,
+    "alignment_a": 1,
+    "alignment_b": 1,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  },
+  {
+    "old_pid": 39,
+    "pid": 439,
+    "threadblock": [
+      128,
+      256,
+      64
+    ],
+    "warp": [
+      64,
+      64,
+      64
+    ],
+    "instruction": [
+      16,
+      8,
+      8
+    ],
+    "stages": 2,
+    "alignment_a": 2,
+    "alignment_b": 2,
+    "family": "fp16_legacy_splitk_universal",
+    "layout": "row_col_col"
+  }
+]

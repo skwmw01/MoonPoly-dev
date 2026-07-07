@@ -1,0 +1,5 @@
+add_executable(moonpoly_bench_gemm_baselines gemm_baselines.cu)
+target_link_libraries(moonpoly_bench_gemm_baselines PRIVATE cublas)
+
+add_subdirectory(cpp)
+add_subdirectory(case_studies/pattern2_twin_gemm)

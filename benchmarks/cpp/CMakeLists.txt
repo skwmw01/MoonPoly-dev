@@ -1,0 +1,20 @@
+add_executable(moonpoly_benchmark moonpoly_vs_cublas_benchmark.cu)
+target_link_libraries(moonpoly_benchmark PUBLIC moonpoly_gemm -lcublas)
+
+add_executable(moonpoly_bench_fp16_cutlass_default fp16_cutlass_default_bench.cu)
+target_link_libraries(moonpoly_bench_fp16_cutlass_default PUBLIC moonpoly_gemm -lcublas)
+
+add_executable(moonpoly_profile_fp16_predictor profile/fp16_predictor_eval.cu)
+target_link_libraries(moonpoly_profile_fp16_predictor PUBLIC moonpoly_gemm -lcublas)
+
+add_executable(moonpoly_profile_fp16_splitk_reduction profile/fp16_splitk_reduction_eval.cu)
+target_link_libraries(moonpoly_profile_fp16_splitk_reduction PUBLIC moonpoly_gemm -lcublas)
+
+add_executable(moonpoly_profile_fp16_pattern2 profile/fp16_pattern2_eval.cu)
+target_link_libraries(moonpoly_profile_fp16_pattern2 PUBLIC moonpoly_gemm -lcublas)
+
+add_executable(moonpoly_profile_fp32_rcc profile/fp32_rcc_profile.cu)
+target_link_libraries(moonpoly_profile_fp32_rcc PUBLIC moonpoly_gemm)
+
+add_executable(moonpoly_profile_int8_rcc profile/int8_rcc_profile.cu)
+target_link_libraries(moonpoly_profile_int8_rcc PUBLIC moonpoly_gemm)

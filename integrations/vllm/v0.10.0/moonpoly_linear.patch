@@ -1,0 +1,753 @@
+diff --git a/vllm/model_executor/layers/linear.py b/vllm/model_executor/layers/linear.py
+index bb81a663d..d347a9770 100644
+--- a/vllm/model_executor/layers/linear.py
++++ b/vllm/model_executor/layers/linear.py
+@@ -2,6 +2,10 @@
+ # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+ 
+ import itertools
++import atexit
++import json
++import os
++import threading
+ from abc import abstractmethod
+ from typing import Any, Literal, Optional, Union
+ 
+@@ -32,6 +36,11 @@ from vllm.platforms import current_platform
+ 
+ logger = init_logger(__name__)
+ 
++try:
++    import moonpoly as _moonpoly
++except ImportError:
++    _moonpoly = None
++
+ WEIGHT_LOADER_V2_SUPPORTED = [
+     "CompressedTensorsLinearMethod",
+     "BitBLASLinearMethod",
+@@ -54,6 +63,688 @@ WEIGHT_LOADER_V2_SUPPORTED = [
+     "ModelOptNvFp4LinearMethod",
+ ]
+ 
++_MOONPOLY_LINEAR_WARNED = False
++_MOONPOLY_WS_WARNED = False
++_MOONPOLY_WS_POOL_LOCK = threading.Lock()
++_MOONPOLY_WS_POOL: dict[tuple[int, int], torch.Tensor] = {}
++_MOONPOLY_STREAMK_STATS_LOCK = threading.Lock()
++_MOONPOLY_STREAMK_STATS: dict[str, int] = {
++    "attempt": 0,
++    "success": 0,
++    "fallback": 0,
++    "skipped_hardcode": 0,
++    "skipped_disabled": 0,
++    "skipped_gate": 0,
++    "skipped_missing_ops": 0,
++}
++_MOONPOLY_PID_WHITELIST_STATS_LOCK = threading.Lock()
++_MOONPOLY_PID_WHITELIST_STATS: dict[str, int] = {
++    "attempt": 0,
++    "hit": 0,
++    "fallback": 0,
++    "skipped_disabled": 0,
++    "skipped_unmapped": 0,
++    "skipped_missing_ops": 0,
++}
++_MOONPOLY_PID_WHITELIST_PID_STATS: dict[int, dict[str, int]] = {}
++_MOONPOLY_PID_WHITELIST_SHAPE_STATS: dict[tuple[int, int, int, int],
++                                           dict[str, int]] = {}
++_MOONPOLY_PID_WHITELIST_STATS_REGISTERED = False
++_MOONPOLY_LINEAR_PROFILE_LOCK = threading.Lock()
++_MOONPOLY_LINEAR_PROFILE: dict[tuple[str, str, int, int, int], dict[str, Any]] = {}
++_MOONPOLY_LINEAR_PROFILE_REGISTERED = False
++
++# Hardcoded StreamK eligibility set requested for current deployment:
++# - Batch/tokens axis M must be small decode-like shape (<16)
++# - N/K must be >= 5120
++# - N/K must match known Linear dims from Llama2-13B and Qwen3-32B.
++_STREAMK_ALLOWED_N: set[int] = {
++    5120,    # hidden / o_proj / down_proj out
++    8192,    # q_proj (Qwen3)
++    10240,   # optional fused qkv (Qwen3)
++    13824,   # intermediate (Llama2-13B)
++    15360,   # qkv fused (Llama2-13B)
++    25600,   # intermediate (Qwen3)
++    32000,   # vocab head (Llama2-13B)
++    151936,  # vocab head (Qwen3)
++}
++_STREAMK_ALLOWED_K: set[int] = {
++    5120,    # hidden
++    13824,   # MLP reduce input (Llama2-13B)
++    25600,   # MLP reduce input (Qwen3)
++}
++
++_MOONPOLY_MERGED_DECODE_SELECTOR: dict[tuple[int, int, int], tuple[int, int]] = {
++    (1, 27648, 5120): (304, 4),
++    (2, 27648, 5120): (95, 2),
++    (4, 27648, 5120): (95, 2),
++    (8, 27648, 5120): (92, 2),
++    (12, 27648, 5120): (92, 2),
++    (16, 27648, 5120): (92, 2),
++    (1, 15360, 5120): (195, 2),
++    (2, 15360, 5120): (96, 2),
++    (4, 15360, 5120): (96, 2),
++    (8, 15360, 5120): (96, 2),
++    (12, 15360, 5120): (96, 2),
++    (1, 5120, 13824): (99, 2),
++    (2, 5120, 13824): (97, 2),
++    (4, 5120, 13824): (99, 2),
++    (8, 5120, 13824): (99, 2),
++    (12, 5120, 13824): (97, 2),
++    (1, 5120, 5120): (96, 2),
++    (2, 5120, 5120): (100, 2),
++    (4, 5120, 5120): (91, 2),
++    (8, 5120, 5120): (91, 2),
++    (12, 5120, 5120): (91, 2),
++    (16, 5120, 5120): (96, 2),
++    (16, 51200, 5120): (185, 2),
++    (12, 51200, 5120): (185, 2),
++    (8, 51200, 5120): (239, 4),
++    (8, 10240, 5120): (166, 4),
++    (8, 5120, 8192): (201, 4),
++    (4, 51200, 5120): (185, 4),
++    (2, 51200, 5120): (185, 2),
++    (1, 51200, 5120): (185, 2),
++}
++
++
++def _is_compiling() -> bool:
++    compiler = getattr(torch, "compiler", None)
++    if compiler is None or not hasattr(compiler, "is_compiling"):
++        return False
++    return bool(compiler.is_compiling())
++
++
++def _safe_warn(msg: str, *args: Any) -> None:
++    # TorchDynamo in compile-mode may reject logger calls in graphable code paths.
++    if _is_compiling():
++        return
++    logger.warning(msg, *args)
++
++
++def _safe_info(msg: str, *args: Any) -> None:
++    if _is_compiling():
++        return
++    logger.info(msg, *args)
++
++
++def _use_moonpoly_linear() -> bool:
++    return os.getenv("VLLM_USE_MOONPOLY_LINEAR", "0") == "1"
++
++
++def _use_moonpoly_streamk() -> bool:
++    return os.getenv("VLLM_USE_MOONPOLY_STREAMK", "1") == "1"
++
++
++def _use_moonpoly_pid_whitelist() -> bool:
++    return os.getenv("VLLM_USE_MOONPOLY_PID_WHITELIST", "0") == "1"
++
++
++def _use_moonpoly_cpp_selector() -> bool:
++    return os.getenv("VLLM_USE_MOONPOLY_CPP_SELECTOR", "0") == "1"
++
++
++def _moonpoly_streamk_pid() -> int:
++    return int(os.getenv("VLLM_MOONPOLY_STREAMK_PID", "40"))
++
++
++def _moonpoly_streamk_split_k() -> int:
++    return int(os.getenv("VLLM_MOONPOLY_STREAMK_SPLITK", "2"))
++
++
++def _moonpoly_pid_whitelist_split_k() -> int:
++    return int(os.getenv("VLLM_MOONPOLY_PID_WHITELIST_SPLITK", "2"))
++
++
++def _parse_int_set_env(name: str) -> set[int]:
++    raw = os.getenv(name, "").strip()
++    if not raw:
++        return set()
++    vals: set[int] = set()
++    for tok in raw.split(","):
++        tok = tok.strip()
++        if not tok:
++            continue
++        vals.add(int(tok))
++    return vals
++
++
++def _streamk_log_every() -> int:
++    return int(os.getenv("VLLM_MOONPOLY_STREAMK_LOG_EVERY", "0"))
++
++
++def _pid_whitelist_log_every() -> int:
++    return int(os.getenv("VLLM_MOONPOLY_PID_WHITELIST_LOG_EVERY", "0"))
++
++
++def _pid_whitelist_log_exit() -> bool:
++    return os.getenv("VLLM_MOONPOLY_PID_WHITELIST_LOG_EXIT", "1") == "1"
++
++
++def _streamk_max_m() -> int:
++    # Conservative default: prioritize decode-like shapes first.
++    return int(os.getenv("VLLM_MOONPOLY_STREAMK_MAX_M", "16"))
++
++
++def _profile_linear_enabled() -> bool:
++    return os.getenv("VLLM_MOONPOLY_PROFILE_LINEAR", "0") == "1"
++
++
++def _profile_linear_max_m() -> int:
++    return int(os.getenv("VLLM_MOONPOLY_PROFILE_LINEAR_MAX_M", "16"))
++
++
++def _profile_linear_out_path() -> str:
++    return os.getenv("VLLM_MOONPOLY_PROFILE_LINEAR_OUT", "").strip()
++
++
++def _profile_linear_should_record(x_2d: torch.Tensor, w: torch.Tensor) -> bool:
++    if not _profile_linear_enabled():
++        return False
++    if x_2d.device.type != "cuda" or w.device.type != "cuda":
++        return False
++    if x_2d.dtype != torch.float16 or w.dtype != torch.float16:
++        return False
++    max_m = _profile_linear_max_m()
++    if max_m > 0 and int(x_2d.shape[0]) > max_m:
++        return False
++    return True
++
++
++def _ensure_linear_profile_exit_handler() -> None:
++    global _MOONPOLY_LINEAR_PROFILE_REGISTERED
++    if _MOONPOLY_LINEAR_PROFILE_REGISTERED:
++        return
++    with _MOONPOLY_LINEAR_PROFILE_LOCK:
++        if _MOONPOLY_LINEAR_PROFILE_REGISTERED:
++            return
++        atexit.register(_dump_linear_profile)
++        _MOONPOLY_LINEAR_PROFILE_REGISTERED = True
++
++
++def _record_linear_profile(backend: str, layer: torch.nn.Module, m: int, n: int,
++                           k: int, ms: float) -> None:
++    prefix = getattr(layer, "prefix", "") or "<unknown>"
++    key = (backend, prefix, m, n, k)
++    flops = 2.0 * float(m) * float(n) * float(k)
++    with _MOONPOLY_LINEAR_PROFILE_LOCK:
++        item = _MOONPOLY_LINEAR_PROFILE.get(key)
++        if item is None:
++            item = {
++                "backend": backend,
++                "layer_prefix": prefix,
++                "m": m,
++                "n": n,
++                "k": k,
++                "count": 0,
++                "total_ms": 0.0,
++                "max_ms": 0.0,
++                "total_tflops": 0.0,
++            }
++            _MOONPOLY_LINEAR_PROFILE[key] = item
++        item["count"] += 1
++        item["total_ms"] += float(ms)
++        item["max_ms"] = max(float(item["max_ms"]), float(ms))
++        if ms > 0.0:
++            item["total_tflops"] += flops / (float(ms) * 1.0e9)
++
++
++def _profile_linear_call(backend: str, layer: torch.nn.Module, x_2d: torch.Tensor,
++                         w: torch.Tensor, fn):
++    _ensure_linear_profile_exit_handler()
++    start = torch.cuda.Event(enable_timing=True)
++    stop = torch.cuda.Event(enable_timing=True)
++    start.record()
++    out = fn()
++    stop.record()
++    stop.synchronize()
++    ms = float(start.elapsed_time(stop))
++    _record_linear_profile(backend, layer, int(x_2d.shape[0]), int(w.shape[0]),
++                           int(x_2d.shape[1]), ms)
++    return out
++
++
++def _dump_linear_profile() -> None:
++    path = _profile_linear_out_path()
++    if not path:
++        return
++    with _MOONPOLY_LINEAR_PROFILE_LOCK:
++        rows = []
++        total_ms = 0.0
++        for item in _MOONPOLY_LINEAR_PROFILE.values():
++            row = dict(item)
++            row["avg_ms"] = (row["total_ms"] / row["count"]
++                             if row["count"] else 0.0)
++            row["avg_tflops"] = (row["total_tflops"] / row["count"]
++                                 if row["count"] else 0.0)
++            total_ms += float(row["total_ms"])
++            rows.append(row)
++    rows.sort(key=lambda x: float(x["total_ms"]), reverse=True)
++    summary = {
++        "rows": rows,
++        "total_ms": total_ms,
++        "num_entries": len(rows),
++    }
++    os.makedirs(os.path.dirname(path), exist_ok=True)
++    with open(path, "w", encoding="utf-8") as f:
++        json.dump(summary, f, indent=2)
++    if rows:
++        top = rows[:10]
++        _safe_info("MoonPoly linear decode-like profile written to %s", path)
++        for row in top:
++            share = (100.0 * float(row["total_ms"]) / total_ms
++                     if total_ms > 0.0 else 0.0)
++            _safe_info(
++                "Linear profile: backend=%s layer=%s shape=(%d,%d,%d) "
++                "count=%d avg_ms=%.4f total_ms=%.4f share=%.2f%%",
++                row["backend"],
++                row["layer_prefix"],
++                row["m"],
++                row["n"],
++                row["k"],
++                row["count"],
++                row["avg_ms"],
++                row["total_ms"],
++                share,
++            )
++
++
++def _streamk_allow_m_set() -> set[int]:
++    return _parse_int_set_env("VLLM_MOONPOLY_STREAMK_ALLOW_M")
++
++
++def _streamk_allow_n_set() -> set[int]:
++    return _parse_int_set_env("VLLM_MOONPOLY_STREAMK_ALLOW_N")
++
++
++def _streamk_allow_k_set() -> set[int]:
++    return _parse_int_set_env("VLLM_MOONPOLY_STREAMK_ALLOW_K")
++
++
++def _streamk_shape_allowed(m: int, n: int, k: int) -> bool:
++    # Deployment hard gate first.
++    if m >= 16:
++        return False
++    if n < 5120 or k < 5120:
++        return False
++    if n not in _STREAMK_ALLOWED_N or k not in _STREAMK_ALLOWED_K:
++        return False
++
++    max_m = _streamk_max_m()
++    if max_m > 0 and m > max_m:
++        return False
++
++    allow_m = _streamk_allow_m_set()
++    if allow_m and m not in allow_m:
++        return False
++
++    allow_n = _streamk_allow_n_set()
++    if allow_n and n not in allow_n:
++        return False
++
++    allow_k = _streamk_allow_k_set()
++    if allow_k and k not in allow_k:
++        return False
++
++    return True
++
++
++def _streamk_stats_inc(key: str) -> None:
++    with _MOONPOLY_STREAMK_STATS_LOCK:
++        _MOONPOLY_STREAMK_STATS[key] = _MOONPOLY_STREAMK_STATS.get(key, 0) + 1
++        total = sum(_MOONPOLY_STREAMK_STATS.values())
++        log_every = _streamk_log_every()
++        if log_every > 0 and total % log_every == 0:
++            _safe_info(
++                "MoonPoly StreamK stats: attempt=%d success=%d fallback=%d "
++                "skipped_hardcode=%d skipped_disabled=%d skipped_gate=%d skipped_missing_ops=%d",
++                _MOONPOLY_STREAMK_STATS.get("attempt", 0),
++                _MOONPOLY_STREAMK_STATS.get("success", 0),
++                _MOONPOLY_STREAMK_STATS.get("fallback", 0),
++                _MOONPOLY_STREAMK_STATS.get("skipped_hardcode", 0),
++                _MOONPOLY_STREAMK_STATS.get("skipped_disabled", 0),
++                _MOONPOLY_STREAMK_STATS.get("skipped_gate", 0),
++                _MOONPOLY_STREAMK_STATS.get("skipped_missing_ops", 0),
++            )
++
++
++def _dump_pid_whitelist_stats() -> None:
++    if not _pid_whitelist_log_exit():
++        return
++    with _MOONPOLY_PID_WHITELIST_STATS_LOCK:
++        stats = dict(_MOONPOLY_PID_WHITELIST_STATS)
++        pid_stats = {
++            pid: dict(items)
++            for pid, items in _MOONPOLY_PID_WHITELIST_PID_STATS.items()
++        }
++        shape_stats = {
++            key: dict(items)
++            for key, items in _MOONPOLY_PID_WHITELIST_SHAPE_STATS.items()
++        }
++    total = sum(stats.values())
++    if total == 0:
++        return
++    _safe_info(
++        "MoonPoly pid-whitelist final stats: attempt=%d hit=%d fallback=%d "
++        "skipped_disabled=%d skipped_unmapped=%d skipped_missing_ops=%d",
++        stats.get("attempt", 0),
++        stats.get("hit", 0),
++        stats.get("fallback", 0),
++        stats.get("skipped_disabled", 0),
++        stats.get("skipped_unmapped", 0),
++        stats.get("skipped_missing_ops", 0),
++    )
++    if pid_stats:
++        for pid, items in sorted(pid_stats.items(),
++                                 key=lambda x: (x[1].get("hit", 0),
++                                                x[1].get("attempt", 0)),
++                                 reverse=True):
++            _safe_info(
++                "MoonPoly pid-whitelist pid=%d: attempt=%d hit=%d fallback=%d",
++                pid,
++                items.get("attempt", 0),
++                items.get("hit", 0),
++                items.get("fallback", 0),
++            )
++    if shape_stats:
++        top_shapes = sorted(
++            shape_stats.items(),
++            key=lambda x: (x[1].get("hit", 0), x[1].get("attempt", 0)),
++            reverse=True)[:20]
++        for (m, n, k, pid), items in top_shapes:
++            _safe_info(
++                "MoonPoly pid-whitelist shape=(%d,%d,%d) pid=%d: "
++                "attempt=%d hit=%d fallback=%d",
++                m,
++                n,
++                k,
++                pid,
++                items.get("attempt", 0),
++                items.get("hit", 0),
++                items.get("fallback", 0),
++            )
++
++
++def _ensure_pid_whitelist_stats_exit_handler() -> None:
++    global _MOONPOLY_PID_WHITELIST_STATS_REGISTERED
++    if _MOONPOLY_PID_WHITELIST_STATS_REGISTERED:
++        return
++    with _MOONPOLY_PID_WHITELIST_STATS_LOCK:
++        if _MOONPOLY_PID_WHITELIST_STATS_REGISTERED:
++            return
++        atexit.register(_dump_pid_whitelist_stats)
++        _MOONPOLY_PID_WHITELIST_STATS_REGISTERED = True
++
++
++def _pid_whitelist_stats_inc(key: str) -> None:
++    _ensure_pid_whitelist_stats_exit_handler()
++    with _MOONPOLY_PID_WHITELIST_STATS_LOCK:
++        _MOONPOLY_PID_WHITELIST_STATS[key] = (
++            _MOONPOLY_PID_WHITELIST_STATS.get(key, 0) + 1)
++        total = sum(_MOONPOLY_PID_WHITELIST_STATS.values())
++        log_every = _pid_whitelist_log_every()
++        if log_every > 0 and total % log_every == 0:
++            _safe_info(
++                "MoonPoly pid-whitelist stats: attempt=%d hit=%d fallback=%d "
++                "skipped_disabled=%d skipped_unmapped=%d skipped_missing_ops=%d",
++                _MOONPOLY_PID_WHITELIST_STATS.get("attempt", 0),
++                _MOONPOLY_PID_WHITELIST_STATS.get("hit", 0),
++                _MOONPOLY_PID_WHITELIST_STATS.get("fallback", 0),
++                _MOONPOLY_PID_WHITELIST_STATS.get("skipped_disabled", 0),
++                _MOONPOLY_PID_WHITELIST_STATS.get("skipped_unmapped", 0),
++                _MOONPOLY_PID_WHITELIST_STATS.get("skipped_missing_ops", 0),
++            )
++
++
++def _pid_whitelist_pid_stats_inc(pid: int, key: str) -> None:
++    _ensure_pid_whitelist_stats_exit_handler()
++    with _MOONPOLY_PID_WHITELIST_STATS_LOCK:
++        item = _MOONPOLY_PID_WHITELIST_PID_STATS.get(pid)
++        if item is None:
++            item = {"attempt": 0, "hit": 0, "fallback": 0}
++            _MOONPOLY_PID_WHITELIST_PID_STATS[pid] = item
++        item[key] = item.get(key, 0) + 1
++
++
++def _pid_whitelist_shape_stats_inc(m: int, n: int, k: int, pid: int,
++                                   key: str) -> None:
++    _ensure_pid_whitelist_stats_exit_handler()
++    with _MOONPOLY_PID_WHITELIST_STATS_LOCK:
++        shape_key = (m, n, k, pid)
++        item = _MOONPOLY_PID_WHITELIST_SHAPE_STATS.get(shape_key)
++        if item is None:
++            item = {"attempt": 0, "hit": 0, "fallback": 0}
++            _MOONPOLY_PID_WHITELIST_SHAPE_STATS[shape_key] = item
++        item[key] = item.get(key, 0) + 1
++
++
++def _moonpoly_linear_op():
++    if hasattr(torch.ops, "moonpoly_ops") and hasattr(
++            torch.ops.moonpoly_ops, "linear"):
++        return torch.ops.moonpoly_ops.linear
++    if _moonpoly is not None and hasattr(_moonpoly, "linear"):
++        return _moonpoly.linear
++    return None
++
++
++def _moonpoly_linear_cpp_selector_op():
++    if hasattr(torch.ops, "moonpoly_ops") and hasattr(
++            torch.ops.moonpoly_ops, "linear_cpp_selector"):
++        return torch.ops.moonpoly_ops.linear_cpp_selector
++    if _moonpoly is not None and hasattr(_moonpoly, "linear_cpp_selector"):
++        return _moonpoly.linear_cpp_selector
++    return None
++
++
++def _moonpoly_ws_size_op():
++    if hasattr(torch.ops, "moonpoly_ops") and hasattr(
++            torch.ops.moonpoly_ops, "fp16_workspace_size"):
++        return torch.ops.moonpoly_ops.fp16_workspace_size
++    return None
++
++
++def _moonpoly_linear_ws_out_op():
++    if hasattr(torch.ops, "moonpoly_ops") and hasattr(
++            torch.ops.moonpoly_ops, "linear_fp16_pid_ws_out"):
++        return torch.ops.moonpoly_ops.linear_fp16_pid_ws_out
++    return None
++
++
++def _lookup_decode_selector(m: int, n: int,
++                            k: int) -> Optional[tuple[int, int]]:
++    return _MOONPOLY_MERGED_DECODE_SELECTOR.get((m, n, k))
++
++
++def _moonpoly_get_workspace(device: torch.device,
++                            required_bytes: int) -> torch.Tensor:
++    req = max(int(required_bytes), 1)
++    stream = torch.cuda.current_stream(device=device)
++    stream_id = int(stream.cuda_stream)
++    key = (int(device.index if device.index is not None else 0), stream_id)
++    with _MOONPOLY_WS_POOL_LOCK:
++        buf = _MOONPOLY_WS_POOL.get(key)
++        if buf is None or buf.numel() < req:
++            buf = torch.empty((req,), device=device, dtype=torch.uint8)
++            _MOONPOLY_WS_POOL[key] = buf
++        return buf
++
++
++def _apply_moonpoly_streamk_linear(layer: torch.nn.Module, x_2d: torch.Tensor,
++                                   w: torch.Tensor) -> Optional[torch.Tensor]:
++    global _MOONPOLY_WS_WARNED
++
++    if not _use_moonpoly_streamk():
++        _streamk_stats_inc("skipped_disabled")
++        return None
++
++    m = int(x_2d.shape[0])
++    n = int(w.shape[0])
++    k = int(x_2d.shape[1])
++    # Hardcoded deployment gate: only known-safe model dims may enter StreamK.
++    if m >= 16 or n < 5120 or k < 5120 or n not in _STREAMK_ALLOWED_N or k not in _STREAMK_ALLOWED_K:
++        _streamk_stats_inc("skipped_hardcode")
++        return None
++
++    if not _streamk_shape_allowed(m, n, k):
++        _streamk_stats_inc("skipped_gate")
++        return None
++
++    ws_size_op = _moonpoly_ws_size_op()
++    linear_ws_op = _moonpoly_linear_ws_out_op()
++    if ws_size_op is None or linear_ws_op is None:
++        _streamk_stats_inc("skipped_missing_ops")
++        return None
++
++    pid = _moonpoly_streamk_pid()
++    split_k = _moonpoly_streamk_split_k()
++    _streamk_stats_inc("attempt")
++    try:
++        ws_bytes = int(ws_size_op(x_2d, w, pid, split_k))
++        workspace = _moonpoly_get_workspace(x_2d.device, ws_bytes)
++        # StreamK workspace may contain synchronization/reduction state.
++        # Reinitialize it to avoid stale data across launches/requests.
++        workspace.zero_()
++        out_2d = torch.empty((x_2d.shape[0], w.shape[0]),
++                             device=x_2d.device,
++                             dtype=x_2d.dtype)
++        linear_ws_op(x_2d, w, out_2d, pid, workspace, split_k)
++        if not torch.isfinite(out_2d).all():
++            raise RuntimeError(
++                f"MoonPoly StreamK produced non-finite output (pid={pid}, split_k={split_k})."
++            )
++        _streamk_stats_inc("success")
++        return out_2d
++    except Exception as e:
++        _streamk_stats_inc("fallback")
++        if not _MOONPOLY_WS_WARNED:
++            _safe_warn(
++                "MoonPoly StreamK path failed once (%s); "
++                "falling back to moonpoly linear/default GEMM.", e)
++            _MOONPOLY_WS_WARNED = True
++        return None
++
++
++def _apply_moonpoly_pid_whitelist_linear(
++        layer: torch.nn.Module, x_2d: torch.Tensor,
++        w: torch.Tensor) -> Optional[torch.Tensor]:
++    if not _use_moonpoly_pid_whitelist():
++        _pid_whitelist_stats_inc("skipped_disabled")
++        return None
++
++    m = int(x_2d.shape[0])
++    n = int(w.shape[0])
++    k = int(x_2d.shape[1])
++    selector = _lookup_decode_selector(m, n, k)
++    if selector is None:
++        _pid_whitelist_stats_inc("skipped_unmapped")
++        return None
++    pid, split_k = selector
++
++    ws_size_op = _moonpoly_ws_size_op()
++    linear_ws_op = _moonpoly_linear_ws_out_op()
++    if ws_size_op is None or linear_ws_op is None:
++        _pid_whitelist_stats_inc("skipped_missing_ops")
++        return None
++
++    _pid_whitelist_stats_inc("attempt")
++    _pid_whitelist_pid_stats_inc(pid, "attempt")
++    _pid_whitelist_shape_stats_inc(m, n, k, pid, "attempt")
++    try:
++        ws_bytes = int(ws_size_op(x_2d, w, pid, split_k))
++        workspace = _moonpoly_get_workspace(x_2d.device, ws_bytes)
++        if ws_bytes > 0:
++            workspace.zero_()
++        out_2d = torch.empty((x_2d.shape[0], w.shape[0]),
++                             device=x_2d.device,
++                             dtype=x_2d.dtype)
++        linear_ws_op(x_2d, w, out_2d, pid, workspace, split_k)
++        if not torch.isfinite(out_2d).all():
++            raise RuntimeError(
++                f"MoonPoly pid-whitelist produced non-finite output (pid={pid}, split_k={split_k})."
++            )
++        _pid_whitelist_stats_inc("hit")
++        _pid_whitelist_pid_stats_inc(pid, "hit")
++        _pid_whitelist_shape_stats_inc(m, n, k, pid, "hit")
++        return out_2d
++    except Exception as e:
++        _pid_whitelist_stats_inc("fallback")
++        _pid_whitelist_pid_stats_inc(pid, "fallback")
++        _pid_whitelist_shape_stats_inc(m, n, k, pid, "fallback")
++        _safe_warn(
++            "MoonPoly pid-whitelist path failed for shape (%d,%d,%d) pid=%d (%s); "
++            "falling back to default MoonPoly path.", m, n, k, pid, e)
++        return None
++
++
++def _apply_moonpoly_linear(layer: torch.nn.Module, x: torch.Tensor,
++                           bias: Optional[torch.Tensor]) -> Optional[torch.Tensor]:
++    global _MOONPOLY_LINEAR_WARNED
++
++    if not _use_moonpoly_linear():
++        return None
++    if x.device.type != "cuda" or layer.weight.device.type != "cuda":
++        return None
++    if x.dtype != torch.float16 or layer.weight.dtype != torch.float16:
++        return None
++    if x.shape[-1] != layer.weight.shape[1]:
++        return None
++
++    moonpoly_linear = _moonpoly_linear_op()
++    if moonpoly_linear is None:
++        if not _MOONPOLY_LINEAR_WARNED:
++            _safe_warn(
++                "VLLM_USE_MOONPOLY_LINEAR=1 but moonpoly op not found; "
++                "falling back to default unquantized GEMM.")
++            _MOONPOLY_LINEAR_WARNED = True
++        return None
++
++    x_shape = x.shape
++    x_2d = x.reshape(-1, x_shape[-1]).contiguous()
++    w = layer.weight.contiguous()
++
++    if _use_moonpoly_cpp_selector():
++        cpp_selector = _moonpoly_linear_cpp_selector_op()
++        if cpp_selector is not None:
++            try:
++                out_2d = cpp_selector(x_2d, w)
++                if bias is not None:
++                    out_2d = out_2d + bias
++                return out_2d.view(*x_shape[:-1], w.shape[0])
++            except Exception as e:
++                if not _MOONPOLY_LINEAR_WARNED:
++                    _safe_warn(
++                        "MoonPoly C++ selector failed once (%s); "
++                        "falling back to Python MoonPoly paths.", e)
++                    _MOONPOLY_LINEAR_WARNED = True
++        elif not _MOONPOLY_LINEAR_WARNED:
++            _safe_warn(
++                "VLLM_USE_MOONPOLY_CPP_SELECTOR=1 but linear_cpp_selector op "
++                "not found; falling back to Python MoonPoly paths.")
++            _MOONPOLY_LINEAR_WARNED = True
++
++    out_2d = _apply_moonpoly_pid_whitelist_linear(layer, x_2d, w)
++    if out_2d is not None:
++        if bias is not None:
++            out_2d = out_2d + bias
++        return out_2d.view(*x_shape[:-1], w.shape[0])
++
++    # Prefer StreamK path with persistent workspace pool if available.
++    out_2d = _apply_moonpoly_streamk_linear(layer, x_2d, w)
++    if out_2d is None:
++        try:
++            out_2d = moonpoly_linear(x_2d, w)
++        except Exception as e:
++            if not _MOONPOLY_LINEAR_WARNED:
++                _safe_warn(
++                    "MoonPoly linear call failed once (%s); "
++                    "falling back to default unquantized GEMM.", e)
++                _MOONPOLY_LINEAR_WARNED = True
++            return None
++
++    if bias is not None:
++        out_2d = out_2d + bias
++    return out_2d.view(*x_shape[:-1], w.shape[0])
++
+ 
+ def adjust_bitblas_shard(param, shard_size, shard_offset):
+     bitblas_tile_size = getattr(param, "bitblas_tile_size", None)
+@@ -222,7 +913,35 @@ class UnquantizedLinearMethod(LinearMethodBase):
+               layer: torch.nn.Module,
+               x: torch.Tensor,
+               bias: Optional[torch.Tensor] = None) -> torch.Tensor:
+-
++        x_shape = x.shape
++        x_2d = x.reshape(-1, x_shape[-1]).contiguous()
++        w = layer.weight.contiguous()
++        profile = _profile_linear_should_record(x_2d, w)
++
++        if profile:
++            _ensure_linear_profile_exit_handler()
++            start = torch.cuda.Event(enable_timing=True)
++            stop = torch.cuda.Event(enable_timing=True)
++            start.record()
++            moonpoly_out = _apply_moonpoly_linear(layer, x, bias)
++            stop.record()
++            stop.synchronize()
++            if moonpoly_out is not None:
++                _record_linear_profile("moonpoly", layer, int(x_2d.shape[0]),
++                                       int(w.shape[0]), int(x_2d.shape[1]),
++                                       float(start.elapsed_time(stop)))
++        else:
++            moonpoly_out = _apply_moonpoly_linear(layer, x, bias)
++        if moonpoly_out is not None:
++            return moonpoly_out
++        if profile:
++            return _profile_linear_call(
++                "cublas",
++                layer,
++                x_2d,
++                w,
++                lambda: dispatch_unquantized_gemm()(layer, x, layer.weight, bias),
++            )
+         return dispatch_unquantized_gemm()(layer, x, layer.weight, bias)
+ 
+ 

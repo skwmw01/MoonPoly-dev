@@ -1,0 +1,16 @@
+{
+  "name": "fp16_rcc_paper_elite",
+  "count": 45,
+  "layout": "row_col_col",
+  "dtype": "fp16",
+  "pids": [
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+    10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+    20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+    30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+    400, 407, 413, 425, 439
+  ],
+  "primary_pids": "0-39",
+  "splitk_pids": [400, 407, 413, 425, 439],
+  "notes": "Paper-facing elite kernel pool. Full legacy split-K family 400-439 is kept as search/debug-only."
+}
