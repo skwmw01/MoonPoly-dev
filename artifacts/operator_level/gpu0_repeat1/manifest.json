@@ -1,0 +1,31 @@
+{
+  "created_at": "2026-08-26T07:05:17.813981+00:00",
+  "repo_root": "/workspace/MoonPoly-dev",
+  "shape_csv": "/workspace/MoonPoly-dev/benchmarks/data/core/gemm_trick.csv",
+  "dataset_total_shapes": 1433,
+  "selected_shapes": 1433,
+  "selected_real_world": 1267,
+  "selected_deepbench": 166,
+  "stages": [
+    "cublas"
+  ],
+  "cuda_visible_devices": "0",
+  "gpu_before": "0, NVIDIA A100 80GB PCIe, GPU-3ecfad62-035b-2626-e769-79c785e7665d, 65 %, 35732 MiB, 45425 MiB\n1, NVIDIA A100 80GB PCIe, GPU-a53fa601-8471-d782-2971-46e5a8e5d328, 99 %, 63840 MiB, 17317 MiB\n2, NVIDIA A100 80GB PCIe, GPU-25019de8-09aa-328a-be23-4bec986badad, 100 %, 32492 MiB, 48665 MiB",
+  "run_note": "FP16 cuBLAS repeat 1 on host GPU 0",
+  "limitations": [
+    "The repository provides a default CUTLASS comparison binary only for FP16.",
+    "C++ benchmark timing is used as provided: 5 warmups and 20 measured iterations."
+  ],
+  "completed_at": "2026-08-26T08:17:23.056933+00:00",
+  "gpu_after": "0, NVIDIA A100 80GB PCIe, GPU-3ecfad62-035b-2626-e769-79c785e7665d, 47 %, 60806 MiB, 20351 MiB\n1, NVIDIA A100 80GB PCIe, GPU-a53fa601-8471-d782-2971-46e5a8e5d328, 56 %, 63880 MiB, 17277 MiB\n2, NVIDIA A100 80GB PCIe, GPU-25019de8-09aa-328a-be23-4bec986badad, 100 %, 33942 MiB, 47215 MiB",
+  "outputs": {
+    "raw_csv": "/workspace/MoonPoly-dev/artifacts/operator_level/gpu0_repeat1/operator_raw.csv",
+    "failures_csv": "/workspace/MoonPoly-dev/artifacts/operator_level/gpu0_repeat1/operator_failures.csv",
+    "summary_json": "/workspace/MoonPoly-dev/artifacts/operator_level/gpu0_repeat1/operator_summary.json",
+    "figures": [
+      "/workspace/MoonPoly-dev/artifacts/operator_level/gpu0_repeat1/operator_vs_cublas.png"
+    ]
+  },
+  "record_count": 4299,
+  "non_pass_record_count": 398
+}

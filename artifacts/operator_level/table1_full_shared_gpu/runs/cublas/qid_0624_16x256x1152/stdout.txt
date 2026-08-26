@@ -1,0 +1,22 @@
+Moonpoly vs cuBLAS Comprehensive Benchmark
+
+Testing matrix size: 16x256x1152
+  Running FP16... Done (Speedup: 1.15x)
+  Running FP32... Done (Speedup: 0.13x)
+  Running INT8... Done (Speedup: 0.89x)
+
+====================================================================================================
+                    MOONPOLY vs CUBLAS BENCHMARK RESULTS
+====================================================================================================
+Type    M x N x K   cuBLAS (ms)    Moonpoly (ms)  Speedup     Cosine Sim     Correctness 
+----------------------------------------------------------------------------------------------------
+FP16    16x256x1152 0.013          0.011          1.15        x1.000000       PASS        
+FP32    16x256x1152 0.015          0.112          0.13        x1.000000       PASS        
+INT8    16x256x1152 0.011          0.013          0.89        x1.000000       PASS        
+====================================================================================================
+Results saved to moonpoly_vs_cublas_benchmark.csv
+
+Summary Statistics:
+  FP16: Avg=1.15x, Min=1.15x, Max=1.15x, Correctness=1/1
+  FP32: Avg=0.13x, Min=0.13x, Max=0.13x, Correctness=1/1
+  INT8: Avg=0.89x, Min=0.89x, Max=0.89x, Correctness=1/1

@@ -1,0 +1,7 @@
+shape_index,qid,category,backend,dtype,m,n,k,flops,baseline_ms,moonpoly_ms,speedup,cosine_similarity,correctness_passed,status,error,wall_seconds
+1,0,Real-World,cublas,INT8,1,1,1,2,0.010496,0.008294,1.265432,0.0,False,incorrect,Cosine similarity threshold failed,0.7254712991416454
+2,1,Real-World,cublas,INT8,1,1,3,6,0.010086,0.008448,1.193939,0.0,False,incorrect,Cosine similarity threshold failed,0.7517151441425085
+3,2,Real-World,cublas,INT8,2,2,2,16,0.009882,0.007066,1.398551,0.0,False,incorrect,Cosine similarity threshold failed,0.6901489496231079
+4,3,Real-World,cublas,INT8,2,2,4,32,,,,,False,missing,Running INT8...Error benchmarking size 2x2x4: std::exception,0.8123918566852808
+5,4,Real-World,cublas,INT8,2,4,4,64,,,,,False,missing,Running INT8...Error benchmarking size 2x4x4: std::exception,0.8356087040156126
+7,6,Real-World,cublas,INT8,1,1,25,50,0.010035,0.008346,1.202454,0.0,False,incorrect,Cosine similarity threshold failed,0.7512162793427706

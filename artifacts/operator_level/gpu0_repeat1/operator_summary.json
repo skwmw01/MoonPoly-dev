@@ -1,0 +1,83 @@
+{
+  "cublas:FP16": {
+    "expected_shapes": 1433,
+    "records": 1433,
+    "passed": 1430,
+    "incorrect": 3,
+    "missing": 0,
+    "process_errors": 0,
+    "speedup_avg": 0.9787333195804196,
+    "speedup_geomean": 0.9122426253031499,
+    "speedup_median": 0.931453,
+    "speedup_min": 0.010695,
+    "speedup_max": 4.59707,
+    "category_correctness": {
+      "Real-World": {
+        "total": 1267,
+        "passed": 1266
+      },
+      "DeepBench": {
+        "total": 166,
+        "passed": 164
+      }
+    },
+    "paper_reported": {
+      "speedup_avg": 1.27,
+      "speedup_max": 5.47
+    }
+  },
+  "cublas:FP32": {
+    "expected_shapes": 1433,
+    "records": 1433,
+    "passed": 1433,
+    "incorrect": 0,
+    "missing": 0,
+    "process_errors": 0,
+    "speedup_avg": 0.6654136461967899,
+    "speedup_geomean": 0.5356002597718208,
+    "speedup_median": 0.661066,
+    "speedup_min": 0.002325,
+    "speedup_max": 14.613637,
+    "category_correctness": {
+      "Real-World": {
+        "total": 1267,
+        "passed": 1267
+      },
+      "DeepBench": {
+        "total": 166,
+        "passed": 166
+      }
+    },
+    "paper_reported": {
+      "speedup_avg": 1.12,
+      "speedup_max": 5.03
+    }
+  },
+  "cublas:INT8": {
+    "expected_shapes": 1433,
+    "records": 1433,
+    "passed": 1038,
+    "incorrect": 95,
+    "missing": 300,
+    "process_errors": 0,
+    "speedup_avg": 1.1848754046242775,
+    "speedup_geomean": 1.1183268837908902,
+    "speedup_median": 1.088994,
+    "speedup_min": 0.256379,
+    "speedup_max": 4.769231,
+    "category_correctness": {
+      "Real-World": {
+        "total": 1267,
+        "passed": 888
+      },
+      "DeepBench": {
+        "total": 166,
+        "passed": 150
+      }
+    },
+    "paper_reported": {
+      "speedup_avg": 1.35,
+      "speedup_max": 14.03
+    }
+  }
+}

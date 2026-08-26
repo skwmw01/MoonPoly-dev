@@ -1,0 +1,3 @@
+Cosine similarity difference: -nan
+Result mismatch between moonpoly and default CUTLASS.
+Failed

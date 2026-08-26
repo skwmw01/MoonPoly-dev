@@ -1,0 +1,68 @@
+{
+  "command": [
+    "/workspace/MoonPoly-dev/build/benchmarks/cpp/moonpoly_benchmark",
+    "160",
+    "1",
+    "1024"
+  ],
+  "returncode": 0,
+  "records": [
+    {
+      "shape_index": 520,
+      "qid": 519,
+      "category": "Real-World",
+      "m": 160,
+      "n": 1,
+      "k": 1024,
+      "flops": 327680,
+      "backend": "cublas",
+      "dtype": "FP16",
+      "baseline_ms": 0.010189,
+      "moonpoly_ms": 0.016947,
+      "speedup": 0.601209,
+      "cosine_similarity": 1.0,
+      "correctness_passed": true,
+      "status": "pass",
+      "error": "",
+      "wall_seconds": 0.776208370923996
+    },
+    {
+      "shape_index": 520,
+      "qid": 519,
+      "category": "Real-World",
+      "m": 160,
+      "n": 1,
+      "k": 1024,
+      "flops": 327680,
+      "backend": "cublas",
+      "dtype": "FP32",
+      "baseline_ms": 0.013517,
+      "moonpoly_ms": 0.070502,
+      "speedup": 0.191721,
+      "cosine_similarity": 1.0,
+      "correctness_passed": true,
+      "status": "pass",
+      "error": "",
+      "wall_seconds": 0.776208370923996
+    },
+    {
+      "shape_index": 520,
+      "qid": 519,
+      "category": "Real-World",
+      "m": 160,
+      "n": 1,
+      "k": 1024,
+      "flops": 327680,
+      "backend": "cublas",
+      "dtype": "INT8",
+      "baseline_ms": 0.010291,
+      "moonpoly_ms": 0.012339,
+      "speedup": 0.834025,
+      "cosine_similarity": 1.0,
+      "correctness_passed": true,
+      "status": "pass",
+      "error": "",
+      "wall_seconds": 0.776208370923996
+    }
+  ]
+}

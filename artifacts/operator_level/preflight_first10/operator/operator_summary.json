@@ -1,0 +1,29 @@
+{
+  "FP16": {
+    "count": 10,
+    "correctness_passed": 10,
+    "correctness_total": 10,
+    "speedup_avg": 1.1903667,
+    "speedup_geomean": 1.1365892763006664,
+    "speedup_min": 0.86875,
+    "speedup_max": 1.797619
+  },
+  "FP32": {
+    "count": 10,
+    "correctness_passed": 10,
+    "correctness_total": 10,
+    "speedup_avg": 0.79904,
+    "speedup_geomean": 0.7583932804708811,
+    "speedup_min": 0.393855,
+    "speedup_max": 1.083799
+  },
+  "INT8": {
+    "count": 8,
+    "correctness_passed": 4,
+    "correctness_total": 8,
+    "speedup_avg": 0.717965625,
+    "speedup_geomean": 0.6403692958217814,
+    "speedup_min": 0.316062,
+    "speedup_max": 1.145454
+  }
+}

@@ -1,0 +1,4 @@
+Cosine similarity difference: 0.000000
+(m, n, k) = (112, 16, 25088)
+warmup: 5, iters: 20
+cutlass time: 8.433869 ms, moonpoly time: 0.842035 ms, speed_up: 10.016053x

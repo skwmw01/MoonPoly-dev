@@ -1,0 +1,32 @@
+{
+  "command": [
+    "/workspace/MoonPoly-dev/build/benchmarks/cpp/moonpoly_bench_fp16_cutlass_default",
+    "16",
+    "2560",
+    "19760",
+    "5",
+    "20"
+  ],
+  "returncode": 0,
+  "records": [
+    {
+      "shape_index": 1237,
+      "qid": 1257,
+      "category": "Real-World",
+      "m": 16,
+      "n": 2560,
+      "k": 19760,
+      "flops": 1618739200,
+      "backend": "cutlass-default",
+      "dtype": "FP16",
+      "baseline_ms": 3.757824,
+      "moonpoly_ms": 0.109158,
+      "speedup": 34.425423,
+      "cosine_similarity": null,
+      "correctness_passed": true,
+      "status": "pass",
+      "error": "",
+      "wall_seconds": 2.106292512267828
+    }
+  ]
+}

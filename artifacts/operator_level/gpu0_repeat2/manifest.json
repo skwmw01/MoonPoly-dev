@@ -1,0 +1,19 @@
+{
+  "created_at": "2026-08-26T08:24:57.188839+00:00",
+  "repo_root": "/workspace/MoonPoly-dev",
+  "shape_csv": "/workspace/MoonPoly-dev/benchmarks/data/core/gemm_trick.csv",
+  "dataset_total_shapes": 1433,
+  "selected_shapes": 1433,
+  "selected_real_world": 1267,
+  "selected_deepbench": 166,
+  "stages": [
+    "cublas"
+  ],
+  "cuda_visible_devices": "0",
+  "gpu_before": "0, NVIDIA A100 80GB PCIe, GPU-3ecfad62-035b-2626-e769-79c785e7665d, 79 %, 60389 MiB, 20767 MiB\n1, NVIDIA A100 80GB PCIe, GPU-a53fa601-8471-d782-2971-46e5a8e5d328, 99 %, 63872 MiB, 17285 MiB\n2, NVIDIA A100 80GB PCIe, GPU-25019de8-09aa-328a-be23-4bec986badad, 100 %, 33942 MiB, 47215 MiB",
+  "run_note": "FP16 cuBLAS repeat 2 on host GPU 0 (resumed)",
+  "limitations": [
+    "The repository provides a default CUTLASS comparison binary only for FP16.",
+    "C++ benchmark timing is used as provided: 5 warmups and 20 measured iterations."
+  ]
+}

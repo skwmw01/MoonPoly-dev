@@ -1,0 +1,16 @@
+{
+  "repo_root": "/workspace/MoonPoly-dev",
+  "outdir": "/workspace/MoonPoly-dev/artifacts/operator_level/preflight_first10",
+  "stages": [
+    "operator"
+  ],
+  "outputs": {
+    "operator": {
+      "raw_csv": "/workspace/MoonPoly-dev/artifacts/operator_level/preflight_first10/operator/operator_raw.csv",
+      "summary_json": "/workspace/MoonPoly-dev/artifacts/operator_level/preflight_first10/operator/operator_summary.json",
+      "shape_csv": "/workspace/MoonPoly-dev/benchmarks/data/core/gemm_trick.csv",
+      "num_shapes": 10
+    }
+  },
+  "warnings": []
+}

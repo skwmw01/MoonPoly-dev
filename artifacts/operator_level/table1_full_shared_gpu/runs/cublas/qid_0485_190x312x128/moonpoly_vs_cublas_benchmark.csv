@@ -1,0 +1,3 @@
+DataType,M,N,K,cuBLAS_time_ms,Moonpoly_time_ms,Speedup,Cosine_Similarity,Correctness_Passed
+FP16,190,312,128,0.008397,0.010035,0.836735,1.00000000,TRUE
+FP32,190,312,128,0.012493,0.026982,0.462998,1.00000000,TRUE

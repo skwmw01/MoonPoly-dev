@@ -1,0 +1,68 @@
+{
+  "command": [
+    "/workspace/MoonPoly-dev/build/benchmarks/cpp/moonpoly_benchmark",
+    "159",
+    "10",
+    "10"
+  ],
+  "returncode": 0,
+  "records": [
+    {
+      "shape_index": 50,
+      "qid": 49,
+      "category": "Real-World",
+      "m": 159,
+      "n": 10,
+      "k": 10,
+      "flops": 31800,
+      "backend": "cublas",
+      "dtype": "FP16",
+      "baseline_ms": 0.02391,
+      "moonpoly_ms": 0.007987,
+      "speedup": 2.99359,
+      "cosine_similarity": 1.0,
+      "correctness_passed": true,
+      "status": "pass",
+      "error": "",
+      "wall_seconds": 1.9242339972406626
+    },
+    {
+      "shape_index": 50,
+      "qid": 49,
+      "category": "Real-World",
+      "m": 159,
+      "n": 10,
+      "k": 10,
+      "flops": 31800,
+      "backend": "cublas",
+      "dtype": "FP32",
+      "baseline_ms": 0.008909,
+      "moonpoly_ms": 0.009216,
+      "speedup": 0.966667,
+      "cosine_similarity": 1.0,
+      "correctness_passed": true,
+      "status": "pass",
+      "error": "",
+      "wall_seconds": 1.9242339972406626
+    },
+    {
+      "shape_index": 50,
+      "qid": 49,
+      "category": "Real-World",
+      "m": 159,
+      "n": 10,
+      "k": 10,
+      "flops": 31800,
+      "backend": "cublas",
+      "dtype": "INT8",
+      "baseline_ms": null,
+      "moonpoly_ms": null,
+      "speedup": null,
+      "cosine_similarity": null,
+      "correctness_passed": false,
+      "status": "missing",
+      "error": "Running INT8...Error benchmarking size 159x10x10: std::exception",
+      "wall_seconds": 1.9242339972406626
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "cublas:FP16": {
+    "expected_shapes": 10,
+    "records": 10,
+    "passed": 10,
+    "incorrect": 0,
+    "missing": 0,
+    "process_errors": 0,
+    "speedup_avg": 1.1242528999999999,
+    "speedup_geomean": 1.0467261227146951,
+    "speedup_median": 1.117696,
+    "speedup_min": 0.669421,
+    "speedup_max": 1.797688,
+    "category_correctness": {
+      "Real-World": {
+        "total": 10,
+        "passed": 10
+      },
+      "DeepBench": {
+        "total": 0,
+        "passed": 0
+      }
+    },
+    "paper_reported": {
+      "speedup_avg": 1.27,
+      "speedup_max": 5.47
+    }
+  },
+  "cublas:FP32": {
+    "expected_shapes": 10,
+    "records": 10,
+    "passed": 10,
+    "incorrect": 0,
+    "missing": 0,
+    "process_errors": 0,
+    "speedup_avg": 0.9139645,
+    "speedup_geomean": 0.8824514461808926,
+    "speedup_median": 0.8908065000000001,
+    "speedup_min": 0.488889,
+    "speedup_max": 1.233533,
+    "category_correctness": {
+      "Real-World": {
+        "total": 10,
+        "passed": 10
+      },
+      "DeepBench": {
+        "total": 0,
+        "passed": 0
+      }
+    },
+    "paper_reported": {
+      "speedup_avg": 1.12,
+      "speedup_max": 5.03
+    }
+  },
+  "cublas:INT8": {
+    "expected_shapes": 10,
+    "records": 10,
+    "passed": 4,
+    "incorrect": 4,
+    "missing": 2,
+    "process_errors": 0,
+    "speedup_avg": 1.0939645,
+    "speedup_geomean": 1.09203645641684,
+    "speedup_median": 1.1026805,
+    "speedup_min": 1.006211,
+    "speedup_max": 1.164286,
+    "category_correctness": {
+      "Real-World": {
+        "total": 10,
+        "passed": 4
+      },
+      "DeepBench": {
+        "total": 0,
+        "passed": 0
+      }
+    },
+    "paper_reported": {
+      "speedup_avg": 1.35,
+      "speedup_max": 14.03
+    }
+  },
+  "cutlass-default:FP16": {
+    "expected_shapes": 10,
+    "records": 10,
+    "passed": 10,
+    "incorrect": 0,
+    "missing": 0,
+    "process_errors": 0,
+    "speedup_avg": 2.073324,
+    "speedup_geomean": 1.9578234900324345,
+    "speedup_median": 1.765432,
+    "speedup_min": 1.290323,
+    "speedup_max": 3.53012,
+    "category_correctness": {
+      "Real-World": {
+        "total": 10,
+        "passed": 10
+      },
+      "DeepBench": {
+        "total": 0,
+        "passed": 0
+      }
+    },
+    "paper_reported": {
+      "speedup_avg": 3.34
+    }
+  }
+}
